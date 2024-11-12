@@ -3,7 +3,9 @@ from flask import Flask, render_template
 # Initialize Flask app
 app = Flask(__name__)
 
-
+@app.route('/<filename>')
+def file(filename):
+    return app.send_static_file(filename)
 
 @app.route('/')
 def index():   
