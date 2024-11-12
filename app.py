@@ -11,6 +11,10 @@ def file(filename):
 def index():   
     return render_template('index.html')
 
+@app.route('/register')
+def register():   
+    return render_template('registration.html')
+
 # Run the Flask app
 if __name__ == '__main__':
     app.run(port=5001)
