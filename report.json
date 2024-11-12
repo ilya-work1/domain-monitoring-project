@@ -2,25 +2,25 @@
     {
         "url": "www.google.com",
         "status_code": "OK",
-        "ssl_status": "failed",
-        "expiration_date": "name 'datetime' is not defined"
+        "ssl_status": "valid",
+        "expiration_date": "2024-12-30 08:23:37"
     },
     {
         "url": "www.facebook.com",
         "status_code": "OK",
-        "ssl_status": "failed",
-        "expiration_date": "name 'datetime' is not defined"
+        "ssl_status": "valid",
+        "expiration_date": "2024-11-20 23:59:59"
     },
     {
         "url": "www.twitter.com",
         "status_code": "OK",
-        "ssl_status": "failed",
-        "expiration_date": "name 'datetime' is not defined"
+        "ssl_status": "valid",
+        "expiration_date": "2025-09-29 23:59:59"
     },
     {
         "url": "www.linkedin.com",
-        "status_code": "FAILED",
-        "ssl_status": "unknown",
-        "expiration_date": "unknown"
+        "status_code": "OK",
+        "ssl_status": "valid",
+        "expiration_date": "2025-04-14 23:59:59"
     }
 ]

@@ -64,6 +64,9 @@ def check_url_mt(urls):
         futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
         # Generate report after tasks complete
         results = [future.result() for future in futures]
+    with open('report.json', 'w') as outfile:
+        json.dump(results, outfile, indent=4)   
+    
     return results
 
 
