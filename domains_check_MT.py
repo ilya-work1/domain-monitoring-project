@@ -1,23 +1,19 @@
 import requests
 import json
 import concurrent.futures
-from queue import Queue
-import time
-import app.py
+import ssl
+import socket
+import concurrent.futures
+from datetime import datetime
 
-urls_queue = Queue()
-analyzed_urls_queue = Queue()
 
-#function that recieves JSON of urls and returns JSON of the status of the urls & SSL status and expiration date
 
-def check_url(list_of_urls):
-   for url in list_of_urls:
-       urls_queue.put(url) 
+#function that recieves JSON of url and returns JSON of the status of the urls & SSL status and expiration date
 
-    while not urls_queue.empty():
-        url = urls_queue.get()
-        
-        result = {'url': url, 'status_code': 'FAILED','ssl_status':'unknown','expiration_date':'unknown'}  # Default to FAILED
+def check_url(url):
+
+        result = {'url': url, 'status_code': 'FAILED', 'ssl_status': 'unknown',
+                  'expiration_date': 'unknown'}  # Default to FAILED
         try:
             ssl_status, expiry_date = check_certificate(url)
             response = requests.get(f'http://{url}', timeout=1)
@@ -28,8 +24,8 @@ def check_url(list_of_urls):
         except requests.exceptions.RequestException:
             result['status_code'] = 'FAILED'
         finally:
-            analyzed_urls_queue.put(result)  # Add result to analyzed queue
-            urls_queue.task_done()
+            return result
+
 
 
 
@@ -61,10 +57,24 @@ def check_certificate(url):
         return 'failed', str(e)
 
 
+#a function that performs the check_url multi-threaded
+def check_url_mt(urls):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as liveness_threads_pool:
+        # Submit URL check tasks
+        futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
+        # Generate report after tasks complete
+        results = [future.result() for future in futures]
+    return results
+
+
+
+
 
 
 if __name__ == '__main__':
-    urls = ['www.google.com', 'www.facebook.com', 'www.youtube.com']
-    check_url(urls)
-    while not analyzed_urls_queue.empty():
-        print(analyzed_urls_queue.get())
+    urls = ['www.google.com', 'www.facebook.com', 'www.twitter.com', 'www.linkedin.com']
+    results = check_url_mt(urls)
+    print(results)
+
+
+

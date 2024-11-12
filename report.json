@@ -1,0 +1,26 @@
+[
+    {
+        "url": "www.google.com",
+        "status_code": "OK",
+        "ssl_status": "failed",
+        "expiration_date": "name 'datetime' is not defined"
+    },
+    {
+        "url": "www.facebook.com",
+        "status_code": "OK",
+        "ssl_status": "failed",
+        "expiration_date": "name 'datetime' is not defined"
+    },
+    {
+        "url": "www.twitter.com",
+        "status_code": "OK",
+        "ssl_status": "failed",
+        "expiration_date": "name 'datetime' is not defined"
+    },
+    {
+        "url": "www.linkedin.com",
+        "status_code": "FAILED",
+        "ssl_status": "unknown",
+        "expiration_date": "unknown"
+    }
+]
