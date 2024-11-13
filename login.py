@@ -1,8 +1,7 @@
 
 users_list = [{'username':'danbd','password':'Dan123456'}, {'username':'ilyash','password':'Ilya123456'},{'username':'matanel','password':'Matan123456'}]
 
-username = input('Username')
-password = input('Password')
+
 
 
 def check_login(username, password):
@@ -10,13 +9,10 @@ def check_login(username, password):
        #check user and password compatibility
            if username.upper() == user_dict.get('username').upper():
               if password == user_dict.get('password'):
-                 print('you logged in')
                  return True
               else:
-                 print('Wrong username or password')
-                 return False 
-              
-   print('Wrong username or password')
+                 return False
+
    return False
 
 def check_username_avaliability(username):
@@ -35,4 +31,3 @@ def registration(username, password):
 
 
 
-registration(username, password)
