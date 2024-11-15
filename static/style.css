@@ -64,13 +64,13 @@ body {
         
 }
 
-.buttons button.login {
+.buttons button#login {
     background-color: #9aacb8;
     color: white;
     width: 20%;
   }
 
-  .buttons button.register {
+  .buttons button#register {
     background-color: #3c455c;
     color: white;
     width: 25%;
