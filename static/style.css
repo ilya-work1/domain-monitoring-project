@@ -1,19 +1,29 @@
 body {
     background-color: #c6d9db;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
   }
 
+  #title {
+    top: 20vh;  
+    text-align: center;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #3c455c;
+    margin-bottom: 40px;
+  }
+  
   form {
     background-color: #F8F0e3;
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    /*margin-top: -370px;*/
     width: 400px;
   }
 
@@ -66,12 +76,15 @@ body {
     width: 25%;
   }
 
-  #title {
-    position: absolute;
-    top: 9vh;  
-    text-align: center;
-    width: 100%;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #3c455c
-  }
+  @media (max-width: 768px) {
+    form {
+        width: 90%;
+        margin: 0 20px;
+    }
+}
+
+#error {
+  color: red;
+  font-family: 'Poppins', sans-serif;
+
+}
