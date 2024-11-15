@@ -13,7 +13,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
-    margin-top: -370px;
+    /*margin-top: -370px;*/
     width: 400px;
   }
 
@@ -54,13 +54,13 @@ body {
         
 }
 
-.buttons button.login {
+.buttons button#login {
     background-color: #9aacb8;
     color: white;
     width: 20%;
   }
 
-  .buttons button.register {
+  .buttons button#register {
     background-color: #3c455c;
     color: white;
     width: 25%;
