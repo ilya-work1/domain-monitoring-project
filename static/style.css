@@ -76,6 +76,12 @@ body {
     width: 25%;
   }
 
+  #back {
+    background-color: #9aacb8;
+    color: white;
+    width: 20%;
+  }
+
   @media (max-width: 768px) {
     form {
         width: 90%;

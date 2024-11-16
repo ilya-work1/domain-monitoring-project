@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_session import Session
 from login import check_login, check_username_avaliability, registration
+from domains_check_MT import check_url , analyzed_urls_queue
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -67,6 +68,25 @@ def dashboard():
         # return render_template('dashboard.html')
         return f'Welcome to your dashboard, {session["username"]}!'
     return 'You are not logged in.', 401
+
+
+@app.route('/check_domains', methods=['POST'])
+def check_domains():
+    if not session.get("username"):
+        return jsonify({'error': 'Not logged in'}), 401
+        
+    data = request.get_json()
+    domains = data.get('domains', [])
+    
+    # Use your existing check_url function
+    check_url(domains)
+    
+    # Collect results from the analyzed_urls_queue
+    results = []
+    while not analyzed_urls_queue.empty():
+        results.append(analyzed_urls_queue.get())
+    
+    return jsonify(results)
 
 
 # Run the Flask app
