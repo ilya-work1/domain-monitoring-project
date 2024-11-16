@@ -3,13 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Monitoring</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Domain Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard-style.css">
 </head>
 <body>
-    <div id="title">
-    <h1>Welcome to your Dashboard</h1>
+    <div class="container">
+        <div class="header-nav">
+            <h1 class="dashboard-title">Domain Management Dashboard</h1>
+            <button class="button refresh-button">
+                <span class="icon">↪</span>
+                Logout
+            </button>
+        </div>
+        
+        <!-- Add Domain Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Add New Domain</h2>
+            </div>
+            <div class="card-content">
+                <div class="domain-input-group">
+                    <input type="text" id="domainInput" placeholder="Enter domain name (e.g., domain.com)" class="domain-input">
+                    <button class="button add-button">
+                        <span class="icon">+</span>
+                        Add Domain
+                    </button>
+                </div>
+                
+                <div class="file-upload-group">
+                    <label for="file-upload" class="button upload-button">
+                        <span class="icon">↑</span>
+                        Upload Domains
+                    </label>
+                    <input type="file" id="file-upload" accept=".txt" class="hidden">
+                    <span class="upload-help">.txt file with one domain per line</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domains Table Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="header-content">
+                    <h2>Your Domains</h2>
+                    <button class="button refresh-button">
+                        <span class="icon">⟳</span>
+                        Refresh All
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table class="domains-table">
+                        <thead>
+                            <tr>
+                                <th>Domain Name</th>
+                                <th>Status</th>
+                                <th>SSL Status</th>
+                                <th>SSL Expiry</th>
+                                <th>SSL Issuer</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="domainsTableBody">
+                            <!-- Table content will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    
+    <script src="dashbored_script.js"></script>
 </body>
 </html>
