@@ -61,6 +61,7 @@ body {
     top: 2vh;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
+    transition: background-color 0.2s;
         
 }
 
@@ -80,6 +81,7 @@ body {
     background-color: #9aacb8;
     color: white;
     width: 20%;
+    transition: background-color 0.2s;
   }
 
   @media (max-width: 768px) {
@@ -93,4 +95,19 @@ body {
   color: red;
   font-family: 'Poppins', sans-serif;
 
+}
+
+.buttons button#login:hover {
+  background-color: #8399a8;  
+  transition: background-color 0.2s;  
+}
+
+.buttons button#register:hover {
+  background-color: #2d3445;  
+  transition: background-color 0.2s;
+}
+
+#back:hover {
+  background-color: #8399a8; 
+  transition: background-color 0.2s;
 }
