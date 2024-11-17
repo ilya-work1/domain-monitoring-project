@@ -1,0 +1,23 @@
+[
+    {
+        "url": "www.google.com",
+        "status_code": "FAILED",
+        "ssl_status": "unknown",
+        "expiration_date": "unknown",
+        "issuer": "unknown"
+    },
+    {
+        "url": "www.facebook.com",
+        "status_code": "OK",
+        "ssl_status": "valid",
+        "expiration_date": "2024-11-24 23:59:59",
+        "issuer": "DigiCert SHA2 High Assurance Server CA"
+    },
+    {
+        "url": "www.youtube.com",
+        "status_code": "OK",
+        "ssl_status": "valid",
+        "expiration_date": "2025-01-13 08:36:56",
+        "issuer": "WR2"
+    }
+]

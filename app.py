@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_session import Session
 from login import check_login, check_username_avaliability, registration
-from domains_check_MT import check_url , analyzed_urls_queue
+from domains_check_MT import check_url_mt as check_url
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -69,24 +69,35 @@ def dashboard():
         return f'Welcome to your dashboard, {session["username"]}!'
     return 'You are not logged in.', 401
 
+def check_username_domains(username):
+    if os.path.exists(f'{username}.json'):
+        with open(f'{username}.json', 'r') as f:
+            data = json.load(f)
+        return data.get('domains', [])
+    return []
+
 
 @app.route('/check_domains', methods=['POST'])
 def check_domains():
-    if not session.get("username"):
-        return jsonify({'error': 'Not logged in'}), 401
+    try:
+        username = session.get('username')
+        if not username:
+            return jsonify({'message': 'You are not logged in!'}), 401
+        urls = check_username_domains(username)
+        if not urls:
+            return jsonify({'message': 'No domains to check!'}), 400
         
-    data = request.get_json()
-    domains = data.get('domains', [])
+        # Use your existing check_url function
+        results = check_url(urls)
+        
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
+
+
+
     
-    # Use your existing check_url function
-    check_url(domains)
-    
-    # Collect results from the analyzed_urls_queue
-    results = []
-    while not analyzed_urls_queue.empty():
-        results.append(analyzed_urls_queue.get())
-    
-    return jsonify(results)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0' ,port=8080)
