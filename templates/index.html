@@ -11,6 +11,11 @@
     <h1>Welcome To The domain Monitoring System</h1>
     </div>
     <form action="/login" method="POST">
+         {% if error %}
+        <div class="error-message" style="color: red; font-weight: bold;">
+            {{ error }}
+        </div>
+        {% endif %}
       <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" placeholder="Username" required>
