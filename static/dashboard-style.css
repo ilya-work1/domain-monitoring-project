@@ -31,19 +31,6 @@ body {
     margin-bottom: 2rem;
 }
 
-.logout-button {
-    background-color: #ef4444;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
 /* Typography */
 .dashboard-title {
     text-align: center;
@@ -275,9 +262,6 @@ body {
     background-color: #cffafe;
 }
 
-.delete-button {
-    color: #dc2626;
-}
 
 .delete-button:hover {
     background-color: #fee2e2;
