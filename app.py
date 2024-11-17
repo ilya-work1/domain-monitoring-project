@@ -42,6 +42,16 @@ def login():
         print("you are not logged in")
         error_message = "Wrong user or password"
         return render_template("index.html", error=error_message)
+    
+
+@app.route('/checkUserAvaliability', methods=['GET'])
+def checkUserAvaliability():
+    username = request.args.get('username')
+    if check_username_avaliability(username):
+        return { "available": True }
+    else:
+        return { "available": False }
+
 
 
 @app.route('/register')
@@ -84,4 +94,4 @@ def check_domains():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8081)
