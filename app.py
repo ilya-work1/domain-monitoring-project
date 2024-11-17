@@ -58,6 +58,13 @@ def checkUserAvaliability():
 def register():
     return render_template('registration.html')
 
+@app.route('/NewUser', methods=['POST'])
+def NewUser():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    registration(username, password)
+    return redirect('/')
+    
 
 @app.route("/logout")
 def logout():

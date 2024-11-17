@@ -1,11 +1,13 @@
-users_list = [{'username': 'danbd', 'password': 'Dan123456'}, {'username': 'ilyash', 'password': 'Ilya123456'},
-              {'username': 'matanel', 'password': 'Matan123456'}]
-
+import json
 
 def check_login(username, password):
     """function for checking login credentials
     """
-    for user_dict in users_list:
+    with open('users.json', 'r')as f:
+        users_file=json.load(f)
+
+    users_file=users_file.get('users')
+    for user_dict in users_file:
         # check user and password compatibility
         if username.upper() == user_dict.get('username').upper():
             if password == user_dict.get('password'):
@@ -19,7 +21,12 @@ def check_login(username, password):
 def check_username_avaliability(username):
     """
     Check if the username is free before new registration"""
-    for user_dict in users_list:
+    with open('users.json', 'r')as f:
+        users_file=json.load(f)
+
+    users_file=users_file.get('users')
+
+    for user_dict in users_file:
         if user_dict.get('username').upper() == username.upper():
             print('this user is not available')
             return False
@@ -31,5 +38,15 @@ def registration(username, password):
     """
     function for register new username """
     if check_username_avaliability(username):
-        users_list.append({'username': username.lower(), 'password': password})
-    print(users_list)
+
+        NewUser={'username': username.lower(), 'password': password}
+
+        with open('users.json', 'r')as f:
+            users_file=json.load(f)
+
+        users_file['users'].append(NewUser)
+
+        with open('users.json', 'w')as f:
+            json.dump(users_file, f)
+
+        print(users_file)
