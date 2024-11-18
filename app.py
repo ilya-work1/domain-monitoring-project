@@ -83,16 +83,20 @@ def check_domains():
         username = session.get('username')
         if not username:
             return jsonify({'message': 'You are not logged in!'}), 401
-        urls = check_username_domains(username)
-        if not urls:
-            return jsonify({'message': 'No domains to check!'}), 400
         
-        # Use your existing check_url function
-        results = check_url(urls)
-        
+        # Get domains from request body
+        data = request.get_json()
+        domains = data.get('domains', [])
+        print("Domains received:", domains)
+
+        # Use existing check_url_mt function
+        results = check_url(domains)
+        print("Results:", results)
+
         return jsonify(results)
     except Exception as e:
         return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
+
 
 
 

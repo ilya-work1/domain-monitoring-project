@@ -68,13 +68,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ domains: domains })
             });
             
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
             
             const results = await response.json();
             results.forEach(result => updateDomainRow(result));
         } catch (error) {
             console.error('Error:', error);
-            alert('Error checking domains. Please try again.');
+            alert('Error checking multiple domains. Please try again. Details: ' + error.message);
         }
     }
 
@@ -89,13 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ domains: [domain] })
             });
             
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error(`Failed to check domain. Status: ${response.status}`);
             
             const [result] = await response.json();
             addOrUpdateDomainRow(result);
         } catch (error) {
             console.error('Error:', error);
-            alert('Error checking domain. Please try again.');
+            alert(`Error checking domain "${domain}": ${error.message}`);
         }
     }
 
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>${result.url}</td>
             <td><span class="status-badge ${result.status_code === 'OK' ? 'active' : 'failed'}">${result.status_code}</span></td>
             <td><span class="ssl-badge ${result.ssl_status}">${result.ssl_status}</span></td>
-            <td>${result.expiration_date}</td>
+            <td>${result.expiration_date}</td><td>${result.issuer || 'Unknown'}</td>
             <td></td>
             <td class="actions-cell">
                 <button class="button action-button check-button" data-tooltip="Check Status">
