@@ -8,6 +8,8 @@ registerButton.addEventListener('click', function() {
     window.location.assign('/register');
 });
 
+
+
 /*loginButton.addEventListener('click', async function() {
     let username = usernameInput.value;
     let password = passwordInput.value;

@@ -9,7 +9,12 @@
 <body>
     <div class="container">
         <div class="header-nav">
-            <h1 class="dashboard-title">Domain Management Dashboard</h1>
+            <h1 class="dashboard-title">
+                {% if username %}
+                Hello {{ username }}, Welcome to your Domain Management Dashboard!
+            {% else %}
+                Domain Management Dashboard
+            {% endif %}</h1>
             <button class="button refresh-button">
                 <span class="icon">↪</span>
                 Logout

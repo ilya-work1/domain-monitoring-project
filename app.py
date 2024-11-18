@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_session import Session
 from login import check_login, check_username_avaliability, registration
-from domains_check_MT import check_url , analyzed_urls_queue
+from domains_check_MT import check_url, analyzed_urls_queue
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -12,11 +12,12 @@ Session(app)
 
 @app.route("/")
 def index():
-    # check if the users is logged in or not
+    """
+    Check if the users is logged in or not and redirect to the login or dashboard page"""
     if not session.get("username"):
-        # if not there in the session then redirect to the login page
+        # if not, then redirect to the login page
         return render_template("index.html")
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session.get("username"))
 
 
 @app.route('/<filename>')
@@ -26,29 +27,31 @@ def file(filename):
 
 @app.route('/login', methods=['POST'])
 def login():
-    # data = request.get_json()
+    """
+    Check login credentials and create flask session"""
+    # Get input user from form
     username = request.form.get('username')
     password = request.form.get('password')
     print(f'username:{username}, password:{password}')
-    # if not os.path.exists('users.json'):
-    #    return jsonify({'message': 'No users registered!'}), 400
-
-    # with open('users.json', 'r') as f:
-    #   users = json.load(f)
-
-    # Validate credentials
-    # if username in users and users[username] == password:
+    # Check credentials
     if check_login(username, password):
         session['username'] = username  # Create session
         print("you are logged in", session['username'])
-
-        # return jsonify({'message': 'Login successful!', 'redirect': '/dashboard'}), 200
-        # return jsonify({'message': 'Login successful!'}), 200
+        return redirect("/")
     else:
         print("you are not logged in")
-        # return jsonify({'message': 'Invalid credentials!'}), 401
-        # return jsonify({'message': 'Invalid credentials!'}), 401
-    return redirect("/", )
+        error_message = "Wrong Username or Password"
+        return render_template("index.html", error=error_message)
+    
+
+@app.route('/checkUserAvaliability', methods=['GET'])
+def checkUserAvaliability():
+    username = request.args.get('username')
+    if check_username_avaliability(username):
+        return { "available": True }
+    else:
+        return { "available": False }
+
 
 
 @app.route('/register')
@@ -65,7 +68,8 @@ def NewUser():
 
 @app.route("/logout")
 def logout():
-    session['username'] = None
+    # session['username'] = None
+    session.pop('username', default=None)
     return redirect("/")
 
 
@@ -81,19 +85,20 @@ def dashboard():
 def check_domains():
     if not session.get("username"):
         return jsonify({'error': 'Not logged in'}), 401
-        
+
     data = request.get_json()
     domains = data.get('domains', [])
-    
+
     # Use your existing check_url function
     check_url(domains)
-    
+
     # Collect results from the analyzed_urls_queue
     results = []
     while not analyzed_urls_queue.empty():
         results.append(analyzed_urls_queue.get())
-    
+
     return jsonify(results)
 
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0' ,port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8081)
