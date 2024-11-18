@@ -94,7 +94,7 @@ body {
 #error {
   color: red;
   font-family: 'Poppins', sans-serif;
-
+  font-weight: 500;
 }
 
 .buttons button#login:hover {
@@ -110,4 +110,8 @@ body {
 #back:hover {
   background-color: #8399a8; 
   transition: background-color 0.2s;
+}
+
+#avaliabilityStatus {
+  font-family: 'Poppins', sans-serif;
 }

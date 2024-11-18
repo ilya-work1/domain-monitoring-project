@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_session import Session
 from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
+import os
+import json
 
 
 # Initialize Flask app
