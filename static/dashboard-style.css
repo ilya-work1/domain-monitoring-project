@@ -141,7 +141,7 @@ body {
 }
 
 .refresh-button:hover {
-    background-color: #9aacb8;
+    background-color: #97A5B8;
     color: white;
 }
 
@@ -285,6 +285,17 @@ body {
     font-size: 12px;
     white-space: nowrap;
     z-index: 1;
+}
+
+.logout-button {
+    background-color: transparent;
+    border: 1px solid #9aacb8;
+    color: #3c455c;
+}
+
+.logout-button:hover {
+    background-color: #445C6F;
+    color: white;
 }
 
 /* Responsive design */

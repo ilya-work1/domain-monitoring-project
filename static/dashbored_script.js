@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileUpload = document.getElementById('file-upload');
     const refreshAllButton = document.querySelector('.refresh-button');
     const tableBody = document.getElementById('domainsTableBody');
-    const logoutButton = document.querySelector('.header-nav .refresh-button');
+    const logoutButton = document.querySelector('.header-nav .logout-button');
 
     // Logout Button
     logoutButton.addEventListener('click', function() {
@@ -133,7 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><span class="status-badge ${result.status_code === 'OK' ? 'active' : 'failed'}">${result.status_code}</span></td>
             <td><span class="ssl-badge ${result.ssl_status}">${result.ssl_status}</span></td>
             <td>${result.expiration_date}</td><td>${result.issuer || 'Unknown'}</td>
-            <td></td>
             <td class="actions-cell">
                 <button class="button action-button check-button" data-tooltip="Check Status">
                     <span class="icon">⟳</span>
