@@ -40,7 +40,7 @@ def login():
         return redirect("/")
     else:
         print("you are not logged in")
-        error_message = "Wrong user or password"
+        error_message = "Wrong Username or Password"
         return render_template("index.html", error=error_message)
     
 
