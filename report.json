@@ -1,19 +1,5 @@
 [
     {
-        "url": "google.com",
-        "status_code": "OK",
-        "ssl_status": "valid",
-        "expiration_date": "2025-01-13 08:36:56",
-        "issuer": "WR2"
-    },
-    {
-        "url": "ynet.co.il",
-        "status_code": "OK",
-        "ssl_status": "valid",
-        "expiration_date": "2025-10-31 23:59:59",
-        "issuer": "DigiCert TLS RSA SHA256 2020 CA1"
-    },
-    {
         "url": "nesher.co.il",
         "status_code": "OK",
         "ssl_status": "valid",
