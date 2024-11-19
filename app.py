@@ -4,6 +4,7 @@ from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
 import os
 import json
+import DataManagement
 
 
 # Initialize Flask app
