@@ -4,11 +4,14 @@ from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
 import os
 import json
+from datetime import timedelta
+
 
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True  
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 

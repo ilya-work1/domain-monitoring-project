@@ -32,21 +32,59 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // File Upload
-    fileUpload.addEventListener('change', function(e) {
+    
+    fileUpload.addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const domains = e.target.result.split('\n')
                     .map(domain => domain.trim())
                     .filter(domain => domain);
                 
-                // Send all domains to be checked
-                checkMultipleDomains(domains);
+                try {
+                    
+                    const validateResponse = await fetch('/bulk_upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ domains: domains })
+                    });
+                    
+                    if (!validateResponse.ok) throw new Error(`Failed to validate domains. Status: ${validateResponse.status}`);
+                    
+                    const validation = await validateResponse.json();
+                    
+                    // Create confirmation message
+                    let confirmMessage = `Found ${domains.length} domains:\n`;
+                    confirmMessage += `✓ ${validation.valid_domains.length} valid domains\n`;
+                    confirmMessage += `✗ ${validation.invalid_domains.length} invalid domains\n\n`;
+                    
+                    if (validation.invalid_domains.length > 0) {
+                        confirmMessage += 'Invalid domains:\n';
+                        validation.invalid_domains.forEach(domain => {
+                            confirmMessage += `- ${domain}\n`;
+                        });
+                        confirmMessage += '\n';
+                    }
+                    
+                    confirmMessage += 'Would you like to proceed with checking the valid domains?';
+                    
+                    // Show confirmation dialog
+                    if (validation.valid_domains.length > 0 && confirm(confirmMessage)) {
+                        // Send only valid domains to be checked
+                        checkMultipleDomains(validation.valid_domains);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error processing domains. Please try again. Details: ' + error.message);
+                }
+                
+                // Reset file input
+                fileUpload.value = '';
             };
             reader.readAsText(file);
-            fileUpload.value = ''; // Reset file input
         }
     });
 
