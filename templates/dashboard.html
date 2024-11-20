@@ -9,16 +9,19 @@
 <body>
     <div class="container">
         <div class="header-nav">
-            <h1 class="dashboard-title">
+            <h1 class="dashboard-title">Domain Management Dashboard</h1>
+            <div class="user-section">
                 {% if username %}
-                Hello {{ username }}, Welcome to your Domain Management Dashboard!
-            {% else %}
-                Domain Management Dashboard
-            {% endif %}</h1>
-            <button class="button logout-button">
-                <span class="icon">↪</span>
-                Logout
-            </button>
+                <div class="username">
+                    <span class="icon">👤</span>
+                    {{ username }}
+                </div>
+                {% endif %}
+                <button class="button logout-button">
+                    <span class="icon">↪</span>
+                    Logout
+                </button>
+            </div>
         </div>
         
         <!-- Add Domain Card -->

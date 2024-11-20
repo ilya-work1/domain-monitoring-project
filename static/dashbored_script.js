@@ -32,24 +32,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // File Upload
-    fileUpload.addEventListener('change', function(e) {
+    
+    fileUpload.addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const domains = e.target.result.split('\n')
                     .map(domain => domain.trim())
                     .filter(domain => domain);
                 
-                // Send all domains to be checked
-                checkMultipleDomains(domains);
+                // Basic domain validation regex
+                const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+                
+                const validDomains = domains.filter(domain => domainRegex.test(domain));
+                const invalidDomains = domains.filter(domain => !domainRegex.test(domain));
+                
+                // Create confirmation message
+                let confirmMessage = `Found ${domains.length} domains:\n`;
+                confirmMessage += `✓ ${validDomains.length} valid domains\n`;
+                confirmMessage += `✗ ${invalidDomains.length} invalid domains\n\n`;
+                
+                if (invalidDomains.length > 0) {
+                    confirmMessage += 'Invalid domains:\n';
+                    invalidDomains.forEach(domain => {
+                        confirmMessage += `- ${domain}\n`;
+                    });
+                    confirmMessage += '\n';
+                }
+                
+                confirmMessage += 'Would you like to proceed with checking the valid domains?';
+                
+                // Show confirmation dialog
+                if (validDomains.length > 0 && confirm(confirmMessage)) {
+                    // Send only valid domains to be checked
+                    checkMultipleDomains(validDomains);
+                }
+                
+                // Reset file input
+                fileUpload.value = '';
             };
             reader.readAsText(file);
-            fileUpload.value = ''; // Reset file input
         }
     });
 
+    
     // Refresh All Button
     refreshAllButton.addEventListener('click', function() {
         const rows = tableBody.getElementsByTagName('tr');
