@@ -22,3 +22,16 @@ def add_domains(domains, username):
         return True
     except Exception as e:
         return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
+    
+
+def update_domains(domains, username):
+    try:
+        current_domains=load_domains(username)
+        for domain in domains:
+            for current_domain in current_domains:
+                if current_domain.get("url")==domain.get("url"):
+                    current_domain['status_code']=domain.get('status_code')
+                else:
+                    current_domains.append(domain)
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
