@@ -4,7 +4,7 @@ from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
 import os
 import json
-import DataManagement
+import DataManagement as dm
 
 
 # Initialize Flask app
@@ -84,33 +84,46 @@ def dashboard():
         return f'Welcome to your dashboard, {session["username"]}!'
     return 'You are not logged in.', 401
 
-def check_username_domains(username):
-    if os.path.exists(f'{username}.json'):
-        with open(f'{username}.json', 'r') as f:
-            data = json.load(f)
-        return data.get('domains', [])
-    return []
 
 
 @app.route('/check_domains', methods=['POST'])
 def check_domains():
-    try:
+    try: 
         username = session.get('username')
+
+        #Check if the username is logged in
         if not username:
-            return jsonify({'message': 'You are not logged in!'}), 401
-        
-        # Get domains from request body
-        data = request.get_json()
-        domains = data.get('domains', [])
-        print("Domains received:", domains)
+            return jsonify({'message': 'You are not logged in.'}), 401
+        #Check if the user's domain's file exists
+        domains = dm.load_domains(username)
 
-        # Use existing check_url_mt function
-        results = check_url(domains)
-        print("Results:", results)
+        #Run the domain check on user's domains
+        result = check_url(domains, username)
 
-        return jsonify(results)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
+    
+@app.route('/add_domains', methods=['POST'])
+def add_domains():
+    try:
+        username = session.get('username')
+        #Check if the username is logged in
+        if not username:
+            return jsonify({'message': 'You are not logged in.'}), 401
+        #Get the domains from the request
+        domains = request.json.get('domains')
+
+        #Add the domains to the user's file
+        if dm.add_domains(domains, username):
+            result = check_url(domains, username)
+            return jsonify({'message': 'Domains added successfully. Testing in progress...', 'results': result})
+
+        
+        else:
+            return jsonify({'message': 'An error occurred while adding domains.'}), 500
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)}), 500
 
 
 
