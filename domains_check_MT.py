@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import json
 import concurrent.futures
 from queue import Queue
-from DataManagement import add_domains
+from DataManagement import add_domains, update_domains
 
 urls_queue = Queue()
 analyzed_urls_queue = Queue()
@@ -26,7 +26,7 @@ def check_url():
                     'status_code': 'OK',
                     'ssl_status': ssl_status,
                     'expiration_date': expiry_date,
-                    'issuer': issuer_name
+                    'issuer': issuer_name,
                     'last_checked': current_time
 
                 })
@@ -75,7 +75,7 @@ def check_url_mt(domains, username):
         analyzed_urls_queue.task_done()
 
     try:
-        if dm.update_domains(results, username):  # שימוש ב-update_domains במקום add_domains
+        if update_domains(results, username):  
             print(f"Domains updated for {username}")
         else:
             print(f"Error updating domains for {username}")
