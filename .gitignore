@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# .gitignore
+.env
+__pycache__/
+flask_session/
+*.pyc
+
 # C extensions
 *.so
 
