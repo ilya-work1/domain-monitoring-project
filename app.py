@@ -5,15 +5,75 @@ from domains_check_MT import check_url_mt as check_url
 import os
 import json
 from datetime import timedelta
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from oauthlib.oauth2 import WebApplicationClient
+import requests
+from config import Config
 
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
 
-# Initialize Flask app
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = True  
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
 app.config["SESSION_TYPE"] = "filesystem"
+app.config.from_object(Config)
 Session(app)
+
+client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
+
+@app.route("/google-login")
+def google_login():
+    # Find out what URL to hit for Google login
+    google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
+
+@app.route("/google-login/callback")
+def callback():
+    code = request.args.get("code")
+    google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
+        code=code,
+    )
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(Config.GOOGLE_CLIENT_ID, Config.GOOGLE_CLIENT_SECRET),
+    )
+
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    if userinfo_response.json().get("email_verified"):
+        unique_id = userinfo_response.json()["sub"]
+        users_email = userinfo_response.json()["email"]
+        users_name = userinfo_response.json()["given_name"]
+        
+        if check_username_avaliability(users_email):
+            registration(users_email, unique_id)
+        
+        session["username"] = users_email
+        return redirect("/")
+    else:
+        return "User email not available or not verified by Google.", 400
+
 
 
 @app.route("/")

@@ -115,3 +115,41 @@ body {
 #avaliabilityStatus {
   font-family: 'Poppins', sans-serif;
 }
+
+.google-btn {
+  width: 240px;
+  height: 42px;
+  background-color: #4285f4;
+  border-radius: 2px;
+  box-shadow: 0 3px 4px 0 rgba(0,0,0,.25);
+  display: flex;
+  cursor: pointer;
+  text-decoration: none;
+}
+.google-btn:hover {
+  box-shadow: 0 0 6px #4285f4;
+}
+.google-icon-wrapper {
+  width: 40px;
+  height: 42px;
+  padding: 1px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.google-icon {
+  width: 18px;
+  height: 18px;
+}
+.btn-text {
+  color: #fff;
+  font-size: 14px;
+  padding: 11px 11px 11px 11px;
+  margin: 0;
+}
+.google-login {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
