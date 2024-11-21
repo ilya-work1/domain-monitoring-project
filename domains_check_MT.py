@@ -10,21 +10,25 @@ from DataManagement import add_domains
 urls_queue = Queue()
 analyzed_urls_queue = Queue()
 
+# Function to check the status of a URL
 def check_url():
     while not urls_queue.empty():
         url_entry = urls_queue.get()
         url = url_entry['url']
         result = {'url': url, 'status_code': 'FAILED', 'ssl_status': 'unknown',
-                  'expiration_date': 'unknown', 'issuer': 'unknown'}
+                  'expiration_date': 'unknown', 'issuer': 'unknown','last_checked':'unknown'}
         try:
             ssl_status, expiry_date, issuer_name = check_certificate(url)
             response = requests.get(f'http://{url}', timeout=5)  # Increased timeout
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if response.status_code == 200:
                 result.update({
                     'status_code': 'OK',
                     'ssl_status': ssl_status,
                     'expiration_date': expiry_date,
                     'issuer': issuer_name
+                    'last_checked': current_time
+
                 })
         except requests.exceptions.RequestException as e:
             print(f"HTTP Error with {url}: {e}")
@@ -32,6 +36,7 @@ def check_url():
             analyzed_urls_queue.put(result)
             urls_queue.task_done()
 
+# Function to check the SSL certificate of a URL
 def check_certificate(url):
     try:
         hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
@@ -47,6 +52,7 @@ def check_certificate(url):
         print(f"SSL Error with {url}: {e}")
         return ('failed', 'unknown', 'unknown')
 
+# Function to check the status of a list of URLs or a single URL for a given user in a multithreaded way
 def check_url_mt(domains, username):
     if not isinstance(domains, list) or not all(isinstance(d, (str, dict)) for d in domains):
         raise ValueError("Invalid input: domains must be a list of URLs or dictionaries with 'url' keys.")
@@ -69,11 +75,13 @@ def check_url_mt(domains, username):
         analyzed_urls_queue.task_done()
 
     try:
-        if add_domains(results, username):
+        if dm.update_domains(results, username):  # שימוש ב-update_domains במקום add_domains
             print(f"Domains updated for {username}")
         else:
             print(f"Error updating domains for {username}")
     except Exception as e:
         print(f"Error updating domains for {username}: {e}")
 
+
     return results
+

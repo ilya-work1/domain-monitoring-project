@@ -16,25 +16,27 @@ def load_domains(username):
     
 
 def add_domains(domains, username):
-       try:
-        username = username
-        current_domains = load_domains(username)
-        
-        # Merge new domains into current_domains
-        for new_domain in domains:
-            # Check if domain already exists
-            existing = next((d for d in current_domains if d['url'] == new_domain['url']), None)
-            if existing:
-                # Update existing domain's details
-                existing.update(new_domain)
-            else:
-                # Add new domain
-                current_domains.append(new_domain)
-
-        # Write updated domains back to file
-        with open(f'{username}_domains.json', 'w') as f:
-            json.dump({"domains": current_domains}, f, indent=4)
+    try:
+        current_domains=load_domains(username)
+        current_domains.append(domains)
         return True
     except Exception as e:
-        print(f"Error updating domains for {username}: {e}")
-        return False
+        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
+    
+
+def update_domains(domains, username):
+    try:
+        current_domains=load_domains(username)
+        for domain in domains:
+            for current_domain in current_domains:
+                if current_domain.get("url")==domain.get("url"):
+                    current_domain['status_code']=domain.get('status_code')
+                    current_domain['ssl_status']=domain.get('ssl_status')
+                    current_domain['expiration_date']=domain.get('expiration_date')
+                    current_domain['issuer']=domain.get('issuer')
+                    current_domain['last_checked']=domain.get('last_checked')
+
+                else:
+                    current_domains.append(domain)
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
