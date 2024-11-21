@@ -41,6 +41,7 @@ def login():
     if check_login(username, password):
         session['username'] = username  # Create session
         print("you are logged in", session['username'])
+        dm.load_domains(username)
         return redirect("/")
     else:
         print("you are not logged in")
@@ -91,13 +92,17 @@ def check_domains():
     try: 
         username = session.get('username')
 
-        #Check if the username is logged in
         if not username:
             return jsonify({'message': 'You are not logged in.'}), 401
-        #Check if the user's domain's file exists
+
+        # Load domains from the user's JSON file
         domains = dm.load_domains(username)
 
-        #Run the domain check on user's domains
+        # If no domains exist, return an empty list
+        if not domains:
+            return jsonify([])
+
+        # Run the domain check on user's domains
         result = check_url(domains, username)
 
         return jsonify(result)
