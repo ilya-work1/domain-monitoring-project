@@ -5,76 +5,85 @@ from datetime import datetime, timezone
 import json
 import concurrent.futures
 from queue import Queue
-import time
+from DataManagement import add_domains, update_domains
 
+urls_queue = Queue()
+analyzed_urls_queue = Queue()
 
+# Function to check the status of a URL
+def check_url():
+    while not urls_queue.empty():
+        url_entry = urls_queue.get()
+        url = url_entry['url']
+        result = {'url': url, 'status_code': 'FAILED', 'ssl_status': 'unknown',
+                  'expiration_date': 'unknown', 'issuer': 'unknown','last_checked':'unknown'}
+        try:
+            ssl_status, expiry_date, issuer_name = check_certificate(url)
+            response = requests.get(f'http://{url}', timeout=5)  # Increased timeout
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if response.status_code == 200:
+                result.update({
+                    'status_code': 'OK',
+                    'ssl_status': ssl_status,
+                    'expiration_date': expiry_date,
+                    'issuer': issuer_name,
+                    'last_checked': current_time
 
-# function that recieves JSON of urls and returns JSON of the status of the urls & SSL status and expiration date
+                })
+        except requests.exceptions.RequestException as e:
+            print(f"HTTP Error with {url}: {e}")
+        finally:
+            analyzed_urls_queue.put(result)
+            urls_queue.task_done()
 
-def check_url(url):
-    result = {'url': url, 'status_code': 'FAILED', 'ssl_status': 'unknown',
-              'expiration_date': 'unknown', 'issuer': 'unknown'}  # Default to FAILED
-    try:
-        # print(f"Checking URL: {url}")
-        ssl_status, expiry_date, issuer_name = check_certificate(url)
-        response = requests.get(f'http://{url}', timeout=1)
-        if response.status_code == 200:
-            result['status_code'] = 'OK'
-            result['ssl_status'] = ssl_status
-            result['expiration_date'] = expiry_date
-            result['issuer'] = issuer_name
-        # print(f"Result for {url}: {result}")
-    except requests.exceptions.RequestException as e:
-        # print(f"HTTP Error for {url}: {e}")
-        result['status_code'] = 'FAILED'
-    return result
-
-
-# function that generates a report of the status of the urls & SSL status and expiration date -- called from check_url function
-
+# Function to check the SSL certificate of a URL
 def check_certificate(url):
+    """Check SSL certificate details"""
+    logger.debug(f"Checking SSL certificate for: {url}")
     try:
         hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
-
         context = ssl.create_default_context()
         with socket.create_connection((hostname, 443)) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                 cert = ssock.getpeercert()
-
         expiry_date_str = cert['notAfter']
-        expiry_date = datetime.strptime(expiry_date_str, "%b %d %H:%M:%S %Y %Z")
-
-        # Convert expiry_date to timezone-aware
-        expiry_date = expiry_date.replace(tzinfo=timezone.utc)
-
+        expiry_date = datetime.strptime(expiry_date_str, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
         issuer = dict(x[0] for x in cert['issuer'])
-        issuer_name = issuer.get('commonName', 'unknown')
-
-        expiry_date_formatted = expiry_date.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Use timezone-aware datetime for comparison
-        if expiry_date < datetime.now(timezone.utc):
-            return 'expired', expiry_date_formatted, issuer_name
-        else:
-            return 'valid', expiry_date_formatted, issuer_name
+        return ('valid', expiry_date.strftime("%Y-%m-%d %H:%M:%S"), issuer.get('commonName', 'unknown'))
     except Exception as e:
-        print(f"Error with {url}: {e}")
-        return 'failed', 'unknown', 'unknown'
+        print(f"SSL Error with {url}: {e}")
+        return ('failed', 'unknown', 'unknown')
+
+# Function to check the status of a list of URLs or a single URL for a given user in a multithreaded way
+def check_url_mt(domains, username):
+    if not isinstance(domains, list) or not all(isinstance(d, (str, dict)) for d in domains):
+        raise ValueError("Invalid input: domains must be a list of URLs or dictionaries with 'url' keys.")
+
+    for domain in domains:
+        if isinstance(domain, dict) and 'url' in domain:
+            urls_queue.put(domain)
+        else:
+            urls_queue.put({"url": domain})
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        for _ in range(20):
+            executor.submit(check_url)
+
+    urls_queue.join()
+
+    results = []
+    while not analyzed_urls_queue.empty():
+        results.append(analyzed_urls_queue.get())
+        analyzed_urls_queue.task_done()
+
+    try:
+        if update_domains(results, username):  
+            print(f"Domains updated for {username}")
+        else:
+            print(f"Error updating domains for {username}")
+    except Exception as e:
+        print(f"Error updating domains for {username}: {e}")
 
 
-
-    #a function that performs the check_url multi-threaded
-def check_url_mt(urls):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as liveness_threads_pool:
-        # Submit URL check tasks
-        futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
-        # Generate report after tasks complete
-        results = [future.result() for future in futures]
-    with open('report.json', 'w') as outfile:
-        json.dump(results, outfile, indent=4)   
     return results
 
-
-if __name__ == '__main__':
-    urls = ['www.google.com', 'www.facebook.com', 'www.youtube.com']
-    check_url_mt(urls)

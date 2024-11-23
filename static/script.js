@@ -10,6 +10,9 @@ registerButton.addEventListener('click', function() {
 
 
 
+
+
+
 /*loginButton.addEventListener('click', async function() {
     let username = usernameInput.value;
     let password = passwordInput.value;

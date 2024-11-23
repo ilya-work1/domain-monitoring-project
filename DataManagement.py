@@ -35,3 +35,5 @@ def update_domains(domains, username):
                     current_domains.append(domain)
     except Exception as e:
         return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
+
+      
