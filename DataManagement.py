@@ -26,26 +26,14 @@ def add_domains(domains, username):
 
 def update_domains(domains, username):
     try:
-        # Load current domains
-        current_domains = load_domains(username)
-        
-        # Update or add new domains
+        current_domains=load_domains(username)
         for domain in domains:
-            # Check if domain already exists
-            existing_domain = next((d for d in current_domains if d['url'] == domain['url']), None)
-            
-            if existing_domain:
-                # Update existing domain
-                existing_domain.update(domain)
-            else:
-                # Add new domain
-                current_domains.append(domain)
-        
-        # Write updated domains back to file
-        with open(f'{username}_domains.json', 'w') as f:
-            json.dump({"domains": current_domains}, f, indent=4)
-        
-        return True
+            for current_domain in current_domains:
+                if current_domain.get("url")==domain.get("url"):
+                    current_domain['status_code']=domain.get('status_code')
+                else:
+                    current_domains.append(domain)
     except Exception as e:
-        print(f"Error updating domains: {e}")
-        return False
+        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
+
+      
