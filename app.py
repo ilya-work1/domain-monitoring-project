@@ -38,41 +38,58 @@ def google_login():
 
 @app.route("/google-login/callback")
 def callback():
-    code = request.args.get("code")
-    google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
-    token_endpoint = google_provider_cfg["token_endpoint"]
+    try:
+        code = request.args.get("code")
+        google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+        token_endpoint = google_provider_cfg["token_endpoint"]
 
-    token_url, headers, body = client.prepare_token_request(
-        token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
-        code=code,
-    )
-    token_response = requests.post(
-        token_url,
-        headers=headers,
-        data=body,
-        auth=(Config.GOOGLE_CLIENT_ID, Config.GOOGLE_CLIENT_SECRET),
-    )
+        token_url, headers, body = client.prepare_token_request(
+            token_endpoint,
+            authorization_response=request.url,
+            redirect_url=request.base_url,
+            code=code,
+        )
+        token_response = requests.post(
+            token_url,
+            headers=headers,
+            data=body,
+            auth=(Config.GOOGLE_CLIENT_ID, Config.GOOGLE_CLIENT_SECRET),
+        )
 
-    client.parse_request_body_response(json.dumps(token_response.json()))
+        client.parse_request_body_response(json.dumps(token_response.json()))
 
-    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
-    uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
+        userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+        uri, headers, body = client.add_token(userinfo_endpoint)
+        userinfo_response = requests.get(uri, headers=headers, data=body)
 
-    if userinfo_response.json().get("email_verified"):
-        unique_id = userinfo_response.json()["sub"]
-        users_email = userinfo_response.json()["email"]
-        users_name = userinfo_response.json()["given_name"]
-        
-        if check_username_avaliability(users_email):
-            registration(users_email, unique_id)
-        
-        session["username"] = users_email
-        return redirect("/")
-    else:
-        return "User email not available or not verified by Google.", 400
+        if userinfo_response.json().get("email_verified"):
+            user_data = userinfo_response.json()
+            unique_id = user_data["sub"]
+            users_email = user_data["email"]
+            users_name = user_data.get("name", "")
+            profile_picture = user_data.get("picture", "")
+            
+            if check_username_avaliability(users_email):
+                registration(
+                    username=users_email,
+                    password=unique_id,
+                    full_name=users_name,
+                    is_google_user=True,
+                    profile_picture=profile_picture
+                )
+
+            # Set session data
+            session["username"] = users_email
+            session["full_name"] = users_name
+            session["profile_picture"] = profile_picture
+            session["is_google_user"] = True
+            
+            return redirect("/")
+            
+    except Exception as e:
+        print(f"Error in callback: {str(e)}")
+        return "Login failed", 400
+
 
 
 
@@ -108,7 +125,7 @@ def login():
         print("you are not logged in")
         error_message = "Wrong Username or Password"
         return render_template("index.html", error=error_message)
-    
+
 
 @app.route('/checkUserAvaliability', methods=['GET'])
 def checkUserAvaliability():
@@ -134,8 +151,7 @@ def NewUser():
 
 @app.route("/logout")
 def logout():
-    # session['username'] = None
-    session.pop('username', default=None)
+    session.clear()  # Clear all session data
     return redirect("/")
 
 
@@ -173,11 +189,7 @@ def check_domains():
         return jsonify(results)
     except Exception as e:
         return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
-
-
-
-
-    
+   
 
 
 if __name__ == '__main__':

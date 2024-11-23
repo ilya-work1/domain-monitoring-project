@@ -153,3 +153,99 @@ body {
   display: flex;
   justify-content: center;
 }
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 5px 0;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.separator span {
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+}
+
+.google-signin {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 170px;
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #b37c57;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  gap: 10px;
+}
+
+.google-button:hover {
+  background: #834e2b
+}
+
+.google-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.google-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.button-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Make sure other buttons maintain consistent styling */
+.buttons {
+  margin-bottom: 10px;
+}
+
+button {
+  min-width: 120px;
+}
+
+/* Ensure form maintains proper spacing */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .google-button {
+      max-width: 100%;
+      padding: 8px 16px;
+  }
+  
+  .button-text {
+      font-size: 13px;
+  }
+  
+  .google-icon {
+      width: 16px;
+      height: 16px;
+  }
+}
