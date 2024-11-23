@@ -9,7 +9,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from oauthlib.oauth2 import WebApplicationClient
 import requests
-from config import Config
+from config import Config, logger
+
 
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
@@ -39,6 +40,7 @@ def google_login():
 @app.route("/google-login/callback")
 def callback():
     try:
+        logger.debug("Processing Google login callback")
         code = request.args.get("code")
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
@@ -57,7 +59,6 @@ def callback():
         )
 
         client.parse_request_body_response(json.dumps(token_response.json()))
-
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = client.add_token(userinfo_endpoint)
         userinfo_response = requests.get(uri, headers=headers, data=body)
@@ -69,7 +70,13 @@ def callback():
             users_name = user_data.get("name", "")
             profile_picture = user_data.get("picture", "")
             
-            if check_username_avaliability(users_email):
+            logger.debug(f"Google authentication successful for: {users_email}")
+            
+            # Check if user exists first
+            is_new_user = check_username_avaliability(users_email)
+            
+            if is_new_user:
+                logger.info(f"Registering new Google user: {users_email}")
                 registration(
                     username=users_email,
                     password=unique_id,
@@ -77,6 +84,8 @@ def callback():
                     is_google_user=True,
                     profile_picture=profile_picture
                 )
+            else:
+                logger.info(f"Existing Google user logged in: {users_email}")
 
             # Set session data
             session["username"] = users_email
@@ -84,10 +93,11 @@ def callback():
             session["profile_picture"] = profile_picture
             session["is_google_user"] = True
             
+            logger.info(f"Google user session created for: {users_email}")
             return redirect("/")
             
     except Exception as e:
-        print(f"Error in callback: {str(e)}")
+        logger.error(f"Error in Google callback: {str(e)}", exc_info=True)
         return "Login failed", 400
 
 
@@ -102,6 +112,9 @@ def index():
         return render_template("index.html")
     return render_template('dashboard.html', username=session.get("username"))
 
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
 
 @app.route('/<filename>')
 def file(filename):
@@ -151,7 +164,10 @@ def NewUser():
 
 @app.route("/logout")
 def logout():
+    username = session.get('username')
     session.clear()  # Clear all session data
+    if username:
+        logger.info(f"User logged out: {username}")
     return redirect("/")
 
 

@@ -6,33 +6,45 @@ import json
 import concurrent.futures
 from queue import Queue
 import time
-
+from config import logger
 
 
 # function that recieves JSON of urls and returns JSON of the status of the urls & SSL status and expiration date
 
 def check_url(url):
-    result = {'url': url, 'status_code': 'FAILED', 'ssl_status': 'unknown',
-              'expiration_date': 'unknown', 'issuer': 'unknown'}  # Default to FAILED
+    """Check single URL status and SSL"""
+    logger.debug(f"Checking URL: {url}")
+    result = {
+        'url': url, 
+        'status_code': 'FAILED', 
+        'ssl_status': 'unknown',
+        'expiration_date': 'unknown', 
+        'issuer': 'unknown'
+    }
+    
     try:
-        # print(f"Checking URL: {url}")
         ssl_status, expiry_date, issuer_name = check_certificate(url)
         response = requests.get(f'http://{url}', timeout=1)
         if response.status_code == 200:
-            result['status_code'] = 'OK'
-            result['ssl_status'] = ssl_status
-            result['expiration_date'] = expiry_date
-            result['issuer'] = issuer_name
-        # print(f"Result for {url}: {result}")
+            result.update({
+                'status_code': 'OK',
+                'ssl_status': ssl_status,
+                'expiration_date': expiry_date,
+                'issuer': issuer_name
+            })
+            logger.info(f"URL check successful for {url}")
+        else:
+            logger.warning(f"URL check failed for {url} with status code: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        # print(f"HTTP Error for {url}: {e}")
-        result['status_code'] = 'FAILED'
+        logger.error(f"Request error for {url}: {str(e)}")
+    except Exception as e:
+        logger.error(f"Unexpected error checking {url}: {str(e)}", exc_info=True)
+    
     return result
 
-
-# function that generates a report of the status of the urls & SSL status and expiration date -- called from check_url function
-
 def check_certificate(url):
+    """Check SSL certificate details"""
+    logger.debug(f"Checking SSL certificate for: {url}")
     try:
         hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
 
@@ -43,37 +55,38 @@ def check_certificate(url):
 
         expiry_date_str = cert['notAfter']
         expiry_date = datetime.strptime(expiry_date_str, "%b %d %H:%M:%S %Y %Z")
-
-        # Convert expiry_date to timezone-aware
         expiry_date = expiry_date.replace(tzinfo=timezone.utc)
-
         issuer = dict(x[0] for x in cert['issuer'])
         issuer_name = issuer.get('commonName', 'unknown')
-
         expiry_date_formatted = expiry_date.strftime("%Y-%m-%d %H:%M:%S")
 
-        # Use timezone-aware datetime for comparison
         if expiry_date < datetime.now(timezone.utc):
+            logger.warning(f"SSL certificate expired for {url}")
             return 'expired', expiry_date_formatted, issuer_name
         else:
+            logger.info(f"Valid SSL certificate found for {url}")
             return 'valid', expiry_date_formatted, issuer_name
+            
     except Exception as e:
-        print(f"Error with {url}: {e}")
+        logger.error(f"SSL check error for {url}: {str(e)}")
         return 'failed', 'unknown', 'unknown'
 
-
-
-    #a function that performs the check_url multi-threaded
 def check_url_mt(urls):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as liveness_threads_pool:
-        # Submit URL check tasks
-        futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
-        # Generate report after tasks complete
-        results = [future.result() for future in futures]
-    with open('report.json', 'w') as outfile:
-        json.dump(results, outfile, indent=4)   
-    return results
-
+    """Multi-threaded URL checker"""
+    logger.info(f"Starting multi-threaded check for {len(urls)} URLs")
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as liveness_threads_pool:
+            futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
+            results = [future.result() for future in futures]
+        
+        with open('report.json', 'w') as outfile:
+            json.dump(results, outfile, indent=4)
+            
+        logger.info(f"Completed checking {len(urls)} URLs")
+        return results
+    except Exception as e:
+        logger.error(f"Error in multi-threaded check: {str(e)}", exc_info=True)
+        return []
 
 if __name__ == '__main__':
     urls = ['www.google.com', 'www.facebook.com', 'www.youtube.com']
