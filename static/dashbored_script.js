@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addButton.addEventListener('click', function() {
         const domain = domainInput.value.trim();
         if (domain) {
-            checkAndAddDomain(domain);
+            checkMultipleDomains([domain]);
             domainInput.value = ''; // Clear input after adding
         }
     });
@@ -26,30 +26,57 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             const domain = this.value.trim();
             if (domain) {
-                checkAndAddDomain(domain);
+                checkMultipleDomains([domain]);
                 this.value = '';
             }
         }
     });
 
-    // File Upload
-    fileUpload.addEventListener('change', function(e) {
+    
+    fileUpload.addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const domains = e.target.result.split('\n')
                     .map(domain => domain.trim())
                     .filter(domain => domain);
                 
-                // Send all domains to be checked
-                checkMultipleDomains(domains);
+                // Basic domain validation regex
+                const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+                
+                const validDomains = domains.filter(domain => domainRegex.test(domain));
+                const invalidDomains = domains.filter(domain => !domainRegex.test(domain));
+                
+                // Create confirmation message
+                let confirmMessage = `Found ${domains.length} domains:\n`;
+                confirmMessage += `✓ ${validDomains.length} valid domains\n`;
+                confirmMessage += `✗ ${invalidDomains.length} invalid domains\n\n`;
+                
+                if (invalidDomains.length > 0) {
+                    confirmMessage += 'Invalid domains:\n';
+                    invalidDomains.forEach(domain => {
+                        confirmMessage += `- ${domain}\n`;
+                    });
+                    confirmMessage += '\n';
+                }
+                
+                confirmMessage += 'Would you like to proceed with checking the valid domains?';
+                
+                // Show confirmation dialog
+                if (validDomains.length > 0 && confirm(confirmMessage)) {
+                    // Send only valid domains to be checked
+                    checkMultipleDomains(validDomains);
+                }
+                
+                // Reset file input
+                fileUpload.value = '';
             };
             reader.readAsText(file);
-            fileUpload.value = ''; // Reset file input
         }
     });
 
+    
     // Refresh All Button
     refreshAllButton.addEventListener('click', function() {
         const rows = tableBody.getElementsByTagName('tr');
@@ -70,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
             
             const results = await response.json();
-            results.forEach(result => updateDomainRow(result));
+            results.forEach(result => addOrUpdateDomainRow(result));
         } catch (error) {
             console.error('Error:', error);
             alert('Error checking multiple domains. Please try again. Details: ' + error.message);
@@ -173,13 +200,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const domain = row.cells[0].textContent;
         
         const checkButton = row.querySelector('.check-button');
-        checkButton.addEventListener('click', () => checkAndAddDomain(domain));
+        checkButton.addEventListener('click', () => checkMultipleDomains([domain]));
 
         const editButton = row.querySelector('.edit-button');
         editButton.addEventListener('click', function() {
             const newDomain = prompt('Edit domain name:', domain);
             if (newDomain && newDomain.trim() && newDomain !== domain) {
-                checkAndAddDomain(newDomain.trim());
+                checkMultipleDomains([newDomain.trim()]);
                 row.remove();
             }
         });

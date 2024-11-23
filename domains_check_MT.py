@@ -38,6 +38,8 @@ def check_url():
 
 # Function to check the SSL certificate of a URL
 def check_certificate(url):
+    """Check SSL certificate details"""
+    logger.debug(f"Checking SSL certificate for: {url}")
     try:
         hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
         context = ssl.create_default_context()

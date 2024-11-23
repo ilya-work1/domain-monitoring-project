@@ -5,13 +5,103 @@ from domains_check_MT import check_url_mt as check_url
 import os
 import json
 import DataManagement as dm
+from datetime import timedelta
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from oauthlib.oauth2 import WebApplicationClient
+import requests
+from config import Config, logger
 
 
-# Initialize Flask app
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
+
 app = Flask(__name__)
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True  
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
 app.config["SESSION_TYPE"] = "filesystem"
+app.config.from_object(Config)
 Session(app)
+
+client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
+
+@app.route("/google-login")
+def google_login():
+    # Find out what URL to hit for Google login
+    google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
+
+@app.route("/google-login/callback")
+def callback():
+    try:
+        logger.debug("Processing Google login callback")
+        code = request.args.get("code")
+        google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
+        token_endpoint = google_provider_cfg["token_endpoint"]
+
+        token_url, headers, body = client.prepare_token_request(
+            token_endpoint,
+            authorization_response=request.url,
+            redirect_url=request.base_url,
+            code=code,
+        )
+        token_response = requests.post(
+            token_url,
+            headers=headers,
+            data=body,
+            auth=(Config.GOOGLE_CLIENT_ID, Config.GOOGLE_CLIENT_SECRET),
+        )
+
+        client.parse_request_body_response(json.dumps(token_response.json()))
+        userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+        uri, headers, body = client.add_token(userinfo_endpoint)
+        userinfo_response = requests.get(uri, headers=headers, data=body)
+
+        if userinfo_response.json().get("email_verified"):
+            user_data = userinfo_response.json()
+            unique_id = user_data["sub"]
+            users_email = user_data["email"]
+            users_name = user_data.get("name", "")
+            profile_picture = user_data.get("picture", "")
+            
+            logger.debug(f"Google authentication successful for: {users_email}")
+            
+            # Check if user exists first
+            is_new_user = check_username_avaliability(users_email)
+            
+            if is_new_user:
+                logger.info(f"Registering new Google user: {users_email}")
+                registration(
+                    username=users_email,
+                    password=unique_id,
+                    full_name=users_name,
+                    is_google_user=True,
+                    profile_picture=profile_picture
+                )
+            else:
+                logger.info(f"Existing Google user logged in: {users_email}")
+
+            # Set session data
+            session["username"] = users_email
+            session["full_name"] = users_name
+            session["profile_picture"] = profile_picture
+            session["is_google_user"] = True
+            
+            logger.info(f"Google user session created for: {users_email}")
+            return redirect("/")
+            
+    except Exception as e:
+        logger.error(f"Error in Google callback: {str(e)}", exc_info=True)
+        return "Login failed", 400
+
+
 
 
 @app.route("/")
@@ -23,6 +113,9 @@ def index():
         return render_template("index.html")
     return render_template('dashboard.html', username=session.get("username"))
 
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
 
 @app.route('/<filename>')
 def file(filename):
@@ -47,7 +140,7 @@ def login():
         print("you are not logged in")
         error_message = "Wrong Username or Password"
         return render_template("index.html", error=error_message)
-    
+
 
 @app.route('/checkUserAvaliability', methods=['GET'])
 def checkUserAvaliability():
@@ -73,8 +166,10 @@ def NewUser():
 
 @app.route("/logout")
 def logout():
-    # session['username'] = None
-    session.pop('username', default=None)
+    username = session.get('username')
+    session.clear()  # Clear all session data
+    if username:
+        logger.info(f"User logged out: {username}")
     return redirect("/")
 
 
