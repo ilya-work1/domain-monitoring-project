@@ -4,7 +4,6 @@ from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
 import os
 import json
-import DataManagement as dm
 from datetime import timedelta
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -134,7 +133,6 @@ def login():
     if check_login(username, password):
         session['username'] = username  # Create session
         print("you are logged in", session['username'])
-        dm.load_domains(username)
         return redirect("/")
     else:
         print("you are not logged in")
@@ -180,55 +178,34 @@ def dashboard():
         return f'Welcome to your dashboard, {session["username"]}!'
     return 'You are not logged in.', 401
 
+def check_username_domains(username):
+    if os.path.exists(f'{username}.json'):
+        with open(f'{username}.json', 'r') as f:
+            data = json.load(f)
+        return data.get('domains', [])
+    return []
 
 
 @app.route('/check_domains', methods=['POST'])
 def check_domains():
-    try: 
-        username = session.get('username')
-
-        if not username:
-            return jsonify({'message': 'You are not logged in.'}), 401
-
-        # Load domains from the user's JSON file
-        domains = dm.load_domains(username)
-
-        # If no domains exist, return an empty list
-        if not domains:
-            return jsonify([])
-
-        # Run the domain check on user's domains
-        result = check_url(domains, username)
-
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
-    
-@app.route('/add_domains', methods=['POST'])
-def add_domains():
     try:
         username = session.get('username')
-        #Check if the username is logged in
         if not username:
-            return jsonify({'message': 'You are not logged in.'}), 401
-        #Get the domains from the request
-        domains = request.json.get('domains')
-
-        #Add the domains to the user's file
-        if dm.add_domains(domains, username):
-            result = check_url(domains, username)
-            return jsonify({'message': 'Domains added successfully. Testing in progress...', 'results': result})
-
+            return jsonify({'message': 'You are not logged in!'}), 401
         
-        else:
-            return jsonify({'message': 'An error occurred while adding domains.'}), 500
+        # Get domains from request body
+        data = request.get_json()
+        domains = data.get('domains', [])
+        print("Domains received:", domains)
+
+        # Use existing check_url_mt function
+        results = check_url(domains)
+        print("Results:", results)
+
+        return jsonify(results)
     except Exception as e:
-        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)}), 500
-
-
-
-
-    
+        return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
+   
 
 
 if __name__ == '__main__':
