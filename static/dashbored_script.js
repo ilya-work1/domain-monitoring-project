@@ -91,8 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ domains: domains })
+                }
             });
             
             if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
@@ -105,7 +104,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-  
+    // Function to check and add a single domain
+    async function checkAndAddDomain(domain) {
+        try {
+            const response = await fetch('/add_domains', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domains: [domain] })
+            });
+            
+            if (!response.ok) throw new Error(`Failed to check domain. Status: ${response.status}`);
+            
+            const responseData = await response.json();
+            const result = responseData.results[0];
+            addOrUpdateDomainRow(result);
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error checking domain "${domain}": ${error.message}`);
+        }
+    }
+
+    // New function to fetch and display domains
+    async function fetchAndDisplayDomains() {
+        try {
+            const response = await fetch('/check_domains', {
+                method: 'POST'
+            });
+            
+            if (!response.ok) throw new Error(`Failed to load domains. Status: ${response.status}`);
+            
+            const results = await response.json();
+            results.forEach(result => addOrUpdateDomainRow(result));
+        } catch (error) {
+            console.error('Error loading domains:', error);
+        }
+    }
+    fetchAndDisplayDomains();
+
 
     // Function to add or update domain row
     function addOrUpdateDomainRow(result) {
@@ -134,6 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    
+
     // Function to create row HTML
     function createRowHTML(result) {
         return `
@@ -141,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><span class="status-badge ${result.status_code === 'OK' ? 'active' : 'failed'}">${result.status_code}</span></td>
             <td><span class="ssl-badge ${result.ssl_status}">${result.ssl_status}</span></td>
             <td>${result.expiration_date}</td><td>${result.issuer || 'Unknown'}</td>
+            <td>${(result.last_checked)}</td>
             <td class="actions-cell">
                 <button class="button action-button check-button" data-tooltip="Check Status">
                     <span class="icon">⟳</span>
