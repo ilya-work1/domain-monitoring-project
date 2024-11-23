@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addButton.addEventListener('click', function() {
         const domain = domainInput.value.trim();
         if (domain) {
-            checkAndAddDomain(domain);
+            checkMultipleDomains([domain]);
             domainInput.value = ''; // Clear input after adding
         }
     });
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             const domain = this.value.trim();
             if (domain) {
-                checkAndAddDomain(domain);
+                checkMultipleDomains([domain]);
                 this.value = '';
             }
         }
@@ -98,33 +98,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
             
             const results = await response.json();
-            results.forEach(result => updateDomainRow(result));
+            results.forEach(result => addOrUpdateDomainRow(result));
         } catch (error) {
             console.error('Error:', error);
             alert('Error checking multiple domains. Please try again. Details: ' + error.message);
         }
     }
 
-    // Function to check and add a single domain
-    async function checkAndAddDomain(domain) {
-        try {
-            const response = await fetch('/check_domains', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ domains: [domain] })
-            });
-            
-            if (!response.ok) throw new Error(`Failed to check domain. Status: ${response.status}`);
-            
-            const [result] = await response.json();
-            addOrUpdateDomainRow(result);
-        } catch (error) {
-            console.error('Error:', error);
-            alert(`Error checking domain "${domain}": ${error.message}`);
-        }
-    }
+  
 
     // Function to add or update domain row
     function addOrUpdateDomainRow(result) {
@@ -179,13 +160,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const domain = row.cells[0].textContent;
         
         const checkButton = row.querySelector('.check-button');
-        checkButton.addEventListener('click', () => checkAndAddDomain(domain));
+        checkButton.addEventListener('click', () => checkMultipleDomains([domain]));
 
         const editButton = row.querySelector('.edit-button');
         editButton.addEventListener('click', function() {
             const newDomain = prompt('Edit domain name:', domain);
             if (newDomain && newDomain.trim() && newDomain !== domain) {
-                checkAndAddDomain(newDomain.trim());
+                checkMultipleDomains([newDomain.trim()]);
                 row.remove();
             }
         });
