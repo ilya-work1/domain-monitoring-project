@@ -7,7 +7,7 @@ import concurrent.futures
 from queue import Queue
 import time
 from config import logger
-
+from DataManagement import update_domains
 
 # function that recieves JSON of urls and returns JSON of the status of the urls & SSL status and expiration date
 
@@ -71,7 +71,7 @@ def check_certificate(url):
         logger.error(f"SSL check error for {url}: {str(e)}")
         return 'failed', 'unknown', 'unknown'
 
-def check_url_mt(urls):
+def check_url_mt(urls, username):
     """Multi-threaded URL checker"""
     logger.info(f"Starting multi-threaded check for {len(urls)} URLs")
     try:
@@ -79,8 +79,7 @@ def check_url_mt(urls):
             futures = [liveness_threads_pool.submit(check_url, url) for url in urls]    
             results = [future.result() for future in futures]
         
-        with open('report.json', 'w') as outfile:
-            json.dump(results, outfile, indent=4)
+        update_domains(results, username)
             
         logger.info(f"Completed checking {len(urls)} URLs")
         return results

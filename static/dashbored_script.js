@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshAllButton = document.querySelector('.refresh-button');
     const tableBody = document.getElementById('domainsTableBody');
     const logoutButton = document.querySelector('.header-nav .logout-button');
-
+    
+    // load the domains data on page load
+    getDomainsData()
+    
     // Logout Button
     logoutButton.addEventListener('click', function() {
         window.location.href = '/logout';
@@ -105,6 +108,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to display domains data from database user
+    async function getDomainsData(){
+        try {
+            const response = await fetch('/get_domains', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                
+            });
+            if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
+            
+            const results = await response.json();
+            results.forEach(result => addOrUpdateDomainRow(result));
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error checking multiple domains. Please try again. Details: ' + error.message);
+        }
+    }
+
   
 
     // Function to add or update domain row
@@ -172,10 +195,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const deleteButton = row.querySelector('.delete-button');
-        deleteButton.addEventListener('click', function() {
+        deleteButton.addEventListener('click', async function() {
             if (confirm('Are you sure you want to delete this domain?')) {
-                row.remove();
+                try {
+                    // Envoie une requête au serveur pour supprimer le domaine
+                    const response = await fetch('/remove_domain', {
+                        method: 'DELETE', // Utiliser DELETE pour une action de suppression
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ domain: row.dataset.domain }) // Envoi de l'URL du domaine
+                    });
+        
+                    if (response.ok) {
+                        // Si la suppression côté serveur réussit, on enlève la ligne de l'interface
+                        row.remove();
+                        alert('The domain has been successfully deleted.');
+                    } else {
+                        // Gérer les erreurs renvoyées par le serveur
+                        const errorMessage = await response.text();
+                        alert(`Failed to delete domain: ${errorMessage}`);
+                    }
+                } catch (error) {
+                    // Gérer les erreurs réseau ou autres
+                    console.error('Error:', error);
+                    alert('An error occurred while trying to delete the domain.');
+                }
             }
         });
+        
     }
 });
