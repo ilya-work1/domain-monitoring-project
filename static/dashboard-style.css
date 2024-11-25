@@ -12,6 +12,18 @@ body {
     padding: 20px;
 }
 
+/* Cards wrapper for side-by-side layout */
+.cards-wrapper {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.card-half {
+    flex: 1;
+    min-width: 0; /* Prevents cards from overflowing their container */
+}
+
 /* Icon styles */
 .icon {
     display: inline-block;
@@ -22,7 +34,6 @@ body {
     line-height: 1;
     margin-right: 0.5em;
 }
-
 
 .header-nav {
     display: flex;
@@ -46,7 +57,7 @@ body {
     background-color: #F8F0e3;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+    margin-bottom: 0rem;
 }
 
 .card-header {
@@ -262,7 +273,6 @@ body {
     background-color: #cffafe;
 }
 
-
 .delete-button:hover {
     background-color: #fee2e2;
 }
@@ -299,25 +309,9 @@ body {
     color: white;
 }
 
-user-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
-}
-
-.username {
-    color: #3c455c;
-    font-weight: 500;
+.user-section {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.4em;
-}
-
-.username .icon {
-    font-size: 1.5em;
-    margin-right: 0;
 }
 
 .user-profile {
@@ -354,92 +348,39 @@ user-section {
     color: #3c455c;
 }
 
-.user-section {
-    display: flex;
-    align-items: center;
+.schedule-button {
+    background-color: #9aacb8;
+    color: white;
 }
 
-.top-cards {
-    display: grid;  /* Change to grid layout */
-    grid-template-columns: 1fr 1fr;  /* Two equal columns */
-    gap: 2rem;
-    margin-bottom: 2rem;
+.schedule-button:hover {
+    background-color: #8399a8;
 }
 
-.card-half {
-    display: block;  /* Reset display */
-    width: 100%;    /* Take full width of grid cell */
-    margin: 0;     
+.schedule-button.stop {
+    background-color: #dc2626;
 }
 
-
-.card {
-    background-color: #F8F0e3;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.schedule-button.stop:hover {
+    background-color: #b91c1c;
 }
 
-/* Override margin for cards in top-cards */
-.top-cards .card {
-    margin-bottom: 0;
+.schedule-button:disabled {
+    background-color: #ccc;
+    cursor: pointer;
 }
 
-
-
-/* Restore margin for the main table card */
-.card:not(.card-half) {
-    margin-bottom: 2rem;
-}
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    /* Container adjustments */
-    .container {
-        padding: 10px;
-    }
-    
-    /* Top cards mobile layout */
-    .top-cards {
-        grid-template-columns: 1fr;  /* Single column on mobile */
+    .cards-wrapper {
+        flex-direction: column;
         gap: 1rem;
     }
 
     .card-half {
         width: 100%;
-        flex: 1 1 auto;
     }
-    
-    /* Restore some margin for stacked cards on mobile */
-    .top-cards .card {
-        margin-bottom: 1rem;
-    }
-    
-    /* Domain input adjustments */
-    .domain-input-group {
-        flex-direction: column;
-    }
-    
-    /* Button adjustments */
-    .button {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    /* File upload adjustments */
-    .file-upload-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .upload-help {
-        text-align: center;
-    }
-    
-    /* Table adjustments */
-    .domains-table {
-        font-size: 0.875rem;
-    }
-    
-    /* User profile adjustments */
+
     .user-profile {
         margin-right: 8px;
     }
@@ -451,5 +392,35 @@ user-section {
     .profile-picture {
         width: 32px;
         height: 32px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    .domain-input-group {
+        flex-direction: column;
+    }
+    
+    .button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .file-upload-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .upload-help {
+        text-align: center;
+    }
+    
+    .domains-table {
+        font-size: 0.875rem;
+    }
+
+    .schedule-buttons {
+        flex-direction: column;
     }
 }

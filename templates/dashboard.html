@@ -36,76 +36,77 @@
         
         <div class="top-cards"></div>
 
-        <!-- Add Domain Card -->
-        <div class="card card-half">
-            <div class="card-header">
-                <h2>Add New Domain</h2>
-            </div>
-            <div class="card-content">
-                <div class="domain-input-group">
-                    <input type="text" id="domainInput" placeholder="Enter domain name (e.g., domain.com)" class="domain-input">
-                    <button class="button add-button">
-                        <span class="icon">+</span>
-                        Add Domain
-                    </button>
+        <!-- Cards wrapper for side-by-side layout -->
+        <div class="cards-wrapper">
+            <!-- Add Domain Card -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <h2>Add New Domain</h2>
                 </div>
-                
-                <div class="file-upload-group">
-                    <label for="file-upload" class="button upload-button">
-                        <span class="icon">↑</span>
-                        Upload Domains
-                    </label>
-                    <input type="file" id="file-upload" accept=".txt" class="hidden">
-                    <span class="upload-help">.txt file with one domain per line</span>
+                <div class="card-content">
+                    <div class="domain-input-group">
+                        <input type="text" id="domainInput" placeholder="Enter domain name (e.g., domain.com)" class="domain-input">
+                        <button class="button add-button">
+                            <span class="icon">+</span>
+                            Add Domain
+                        </button>
+                    </div>
+                    
+                    <div class="file-upload-group">
+                        <label for="file-upload" class="button upload-button">
+                            <span class="icon">↑</span>
+                            Upload Domains
+                        </label>
+                        <input type="file" id="file-upload" accept=".txt" class="hidden">
+                        <span class="upload-help">.txt file with one domain per line</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Scheduler Card -->
-        <div class="card card-half">
-            <div class="card-header">
-                <h2>Schedule Checks</h2>
-            </div>
-            <div class="card-content">
-                <div class="scheduler-options">
-                    <!-- Hourly Schedule Option -->
-                    <div class="schedule-group">
-                        <label class="schedule-label">
-                            <input type="radio" name="schedule-type" value="hourly" class="schedule-radio">
-                            Run every
-                            <input type="number" id="hourlyInterval" min="1" max="24" value="1" class="schedule-input">
-                            hour(s)
-                        </label>
-                    </div>
-                    
-                    <!-- Daily Schedule Option -->
-                    <div class="schedule-group">
-                        <label class="schedule-label">
-                            <input type="radio" name="schedule-type" value="daily" class="schedule-radio">
-                            Run once daily at
-                            <input type="time" id="dailyTime" class="schedule-input" value="00:00">
-                        </label>
-                    </div>
-                    
-                    <!-- Schedule Status -->
-                    <div class="schedule-status">
-                        <span id="nextRunTime" class="next-run">Next check: Not scheduled</span>
-                        <div class="schedule-buttons">
-                            <button id="startSchedule" class="button schedule-button">
-                                <span class="icon">▶</span>
-                                Start Schedule
-                            </button>
-                            <button id="stopSchedule" class="button schedule-button stop" disabled>
-                                <span class="icon">⏹</span>
-                                Stop Schedule
-                            </button>
+            <!-- Scheduler Card -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <h2>Schedule Checks</h2>
+                </div>
+                <div class="card-content">
+                    <div class="scheduler-options">
+                        <!-- Hourly Schedule Option -->
+                        <div class="schedule-group">
+                            <label class="schedule-label">
+                                <input type="radio" name="schedule-type" value="hourly" class="schedule-radio">
+                                Run every
+                                <input type="number" id="hourlyInterval" min="1" max="24" value="1" class="schedule-input">
+                                hour(s)
+                            </label>
+                        </div>
+                        
+                        <!-- Daily Schedule Option -->
+                        <div class="schedule-group">
+                            <label class="schedule-label">
+                                <input type="radio" name="schedule-type" value="daily" class="schedule-radio">
+                                Run once daily at
+                                <input type="time" id="dailyTime" class="schedule-input" value="00:00">
+                            </label>
+                        </div>
+                        
+                        <!-- Schedule Status -->
+                        <div class="schedule-status">
+                            <span id="nextRunTime" class="next-run">Next check: Not scheduled</span>
+                            <div class="schedule-buttons">
+                                <button id="startSchedule" class="button schedule-button">
+                                    <span class="icon">▶</span>
+                                    Start Schedule
+                                </button>
+                                <button id="stopSchedule" class="button schedule-button stop" disabled>
+                                    <span class="icon">⏹</span>
+                                    Stop Schedule
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-        
 
         <!-- Domains Table Card -->
         <div class="card">
