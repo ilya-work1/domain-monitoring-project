@@ -8,7 +8,10 @@ from datetime import timedelta
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 from config import Config, logger
-from DataManagement import load_domains, remove_domain
+from DataManagement import load_domains, remove_domain, update_user_task, delete_user_task, load_user_tasks
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
@@ -21,6 +24,100 @@ app.config.from_object(Config)
 Session(app)
 
 client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
+
+# initialize scheduler object
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+user_schedules = {}
+
+@app.route("/schedule/hourly", methods=["POST"])
+def schedule_hourly():
+    username = session.get("username")
+    if not username:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+
+    data = request.json
+    domains = [domain["url"] for domain in load_domains(username)]
+    interval = data.get("interval", 1)
+
+    if not domains or interval <= 0:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
+
+    job_id = f"{username}_hourly_task"
+    scheduler.add_job(
+        func=check_url,  # Exemple : remplacer par une tâche utile
+        trigger=IntervalTrigger(hours=interval),
+        args=[domains, username],
+        id=job_id,
+        replace_existing=True
+    )
+    next_run = scheduler.get_job(job_id).next_run_time
+    new_task = {
+        "type": "hourly",
+        "interval": interval,        
+        "next_run": next_run.strftime("%Y-%m-%dT%H:%M:%S"),
+        "job_id": job_id
+    }
+    update_user_task(username, new_task)
+    return jsonify({"status": "success", "next_run": next_run.strftime("%Y-%m-%d %H:%M:%S")})
+
+@app.route("/schedule/daily", methods=["POST"])
+def schedule_daily():
+    username = session.get("username")
+    if not username:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+
+    data = request.json
+    domains = [domain["url"] for domain in load_domains(username)]
+    time = data.get("time", "00:00")
+    hour, minute = map(int, time.split(":"))
+
+    if not domains:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
+
+    job_id = f"{username}_daily_task"
+    scheduler.add_job(
+        func=check_url,  # Exemple : remplacer par une tâche utile
+        trigger=CronTrigger(hour=hour, minute=minute),
+        args=[domains, username],
+        id=job_id,
+        replace_existing=True
+    )
+    next_run = scheduler.get_job(job_id).next_run_time
+    new_task = {
+        "type": "daily",
+        "time": time,        
+        "next_run": next_run.strftime("%Y-%m-%dT%H:%M:%S"),
+        "job_id": job_id
+    }
+    update_user_task(username, new_task)
+    return jsonify({"status": "success", "next_run": next_run.strftime("%Y-%m-%d %H:%M:%S")})
+
+@app.route("/schedule/stop", methods=["POST"])
+def stop_schedule():
+    username = session.get("username")
+    if not username:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+
+    if username in user_schedules and user_schedules[username].get("job_id"):
+        job_id = user_schedules[username]["job_id"]
+        scheduler.remove_job(job_id)
+        user_schedules.pop(username, None)
+        delete_user_task(username, job_id)
+
+    return jsonify({"status": "success", "message": "Scheduler stopped for current user"})
+
+@app.route("/schedule/status", methods=["GET"])
+def schedule_status():
+    username = session.get("username")
+    if not username:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+
+    tasks = load_user_tasks(username).get("tasks", [])
+    return jsonify({"status": "success", "tasks": tasks})
+
+
 
 @app.route("/google-login")
 def google_login():
