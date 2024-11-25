@@ -25,12 +25,20 @@ def add_domains(domains, username):
     
 def remove_domain(domain_to_remove, username):
     domains = load_domains(username)
-    for domain in domains:
-        if domain['url'] == domain_to_remove:
-            domains.remove(domain)
-            return True
-        else: 
-            return False
+    domain_found=False
+    
+    for i in range(len(domains)):
+        if domains[i]['url'] == domain_to_remove:
+            del domains[i]
+            domain_found=True
+            break
+
+    if domain_found:
+        with open(f'{username}_domains.json', 'w') as f:
+            json.dump({"domains": domains}, f, indent=4)
+        return True
+    else:     
+        return False
 
     
 

@@ -222,14 +222,14 @@ def get_domains():
     
 
 @app.route('/remove_domain', methods=['DELETE'])
-def remove_domain():
+def remove_domain_from_database():
     try:
         username = session.get('username')
         if not username:
             return jsonify({'message': 'You are not logged in!'}), 401
         
-        data = request.get_json()
-        domain_to_remove = data.get('domain')
+        
+        domain_to_remove = request.args.get('domain')
         
         if not domain_to_remove:
                 return jsonify({'message': 'No domain provided for deletion!'}), 400

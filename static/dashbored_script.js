@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to create row HTML
     function createRowHTML(result) {
         return `
-            <td>${result.url}</td>
+            <td class = "domain-name">${result.url}</td>
             <td><span class="status-badge ${result.status_code === 'OK' ? 'active' : 'failed'}">${result.status_code}</span></td>
             <td><span class="ssl-badge ${result.ssl_status}">${result.ssl_status}</span></td>
             <td>${result.expiration_date}</td><td>${result.issuer || 'Unknown'}</td>
@@ -199,12 +199,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (confirm('Are you sure you want to delete this domain?')) {
                 try {
                     // Envoie une requête au serveur pour supprimer le domaine
-                    const response = await fetch('/remove_domain', {
-                        method: 'DELETE', // Utiliser DELETE pour une action de suppression
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ domain: row.dataset.domain }) // Envoi de l'URL du domaine
+                    const domainElement = row.querySelector('.domain-name'); 
+                    const domain = encodeURIComponent(domainElement.innerHTML.trim());
+                    console.log(domain);
+                    const response = await fetch(`/remove_domain?domain=${domain}`, {
+                        method: 'DELETE', // DELETE sans body
                     });
         
                     if (response.ok) {
@@ -213,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert('The domain has been successfully deleted.');
                     } else {
                         // Gérer les erreurs renvoyées par le serveur
-                        const errorMessage = await response.text();
+                        const errorMessage = await response.json();
                         alert(`Failed to delete domain: ${errorMessage}`);
                     }
                 } catch (error) {
