@@ -5,8 +5,6 @@ from domains_check_MT import check_url_mt as check_url
 import os
 import json
 from datetime import timedelta
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 from config import Config, logger

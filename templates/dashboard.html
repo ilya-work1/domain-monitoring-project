@@ -34,9 +34,10 @@
             </div>
         </div>
         
-        
+        <div class="top-cards"></div>
+
         <!-- Add Domain Card -->
-        <div class="card">
+        <div class="card card-half">
             <div class="card-header">
                 <h2>Add New Domain</h2>
             </div>
@@ -59,6 +60,52 @@
                 </div>
             </div>
         </div>
+
+        <!-- Scheduler Card -->
+        <div class="card card-half">
+            <div class="card-header">
+                <h2>Schedule Checks</h2>
+            </div>
+            <div class="card-content">
+                <div class="scheduler-options">
+                    <!-- Hourly Schedule Option -->
+                    <div class="schedule-group">
+                        <label class="schedule-label">
+                            <input type="radio" name="schedule-type" value="hourly" class="schedule-radio">
+                            Run every
+                            <input type="number" id="hourlyInterval" min="1" max="24" value="1" class="schedule-input">
+                            hour(s)
+                        </label>
+                    </div>
+                    
+                    <!-- Daily Schedule Option -->
+                    <div class="schedule-group">
+                        <label class="schedule-label">
+                            <input type="radio" name="schedule-type" value="daily" class="schedule-radio">
+                            Run once daily at
+                            <input type="time" id="dailyTime" class="schedule-input" value="00:00">
+                        </label>
+                    </div>
+                    
+                    <!-- Schedule Status -->
+                    <div class="schedule-status">
+                        <span id="nextRunTime" class="next-run">Next check: Not scheduled</span>
+                        <div class="schedule-buttons">
+                            <button id="startSchedule" class="button schedule-button">
+                                <span class="icon">▶</span>
+                                Start Schedule
+                            </button>
+                            <button id="stopSchedule" class="button schedule-button stop" disabled>
+                                <span class="icon">⏹</span>
+                                Stop Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
 
         <!-- Domains Table Card -->
         <div class="card">

@@ -359,38 +359,72 @@ user-section {
     align-items: center;
 }
 
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .user-profile {
-        margin-right: 8px;
-    }
-    
-    .email {
-        display: none; /* Hide email on mobile */
-    }
-    
-    .profile-picture {
-        width: 32px;
-        height: 32px;
-    }
+.top-cards {
+    display: grid;  /* Change to grid layout */
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
-/* Responsive design */
+.card-half {
+    display: block;  /* Reset display */
+    width: 100%;    /* Take full width of grid cell */
+    margin: 0;     
+}
+
+
+.card {
+    background-color: #F8F0e3;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Override margin for cards in top-cards */
+.top-cards .card {
+    margin-bottom: 0;
+}
+
+
+
+/* Restore margin for the main table card */
+.card:not(.card-half) {
+    margin-bottom: 2rem;
+}
+
 @media (max-width: 768px) {
+    /* Container adjustments */
     .container {
         padding: 10px;
     }
     
+    /* Top cards mobile layout */
+    .top-cards {
+        grid-template-columns: 1fr;  /* Single column on mobile */
+        gap: 1rem;
+    }
+
+    .card-half {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+    
+    /* Restore some margin for stacked cards on mobile */
+    .top-cards .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Domain input adjustments */
     .domain-input-group {
         flex-direction: column;
     }
     
+    /* Button adjustments */
     .button {
         width: 100%;
         justify-content: center;
     }
     
+    /* File upload adjustments */
     .file-upload-group {
         flex-direction: column;
         align-items: stretch;
@@ -400,7 +434,22 @@ user-section {
         text-align: center;
     }
     
+    /* Table adjustments */
     .domains-table {
         font-size: 0.875rem;
+    }
+    
+    /* User profile adjustments */
+    .user-profile {
+        margin-right: 8px;
+    }
+    
+    .email {
+        display: none;
+    }
+    
+    .profile-picture {
+        width: 32px;
+        height: 32px;
     }
 }
