@@ -135,7 +135,7 @@ def login():
     else:
         print("you are not logged in")
         error_message = "Wrong Username or Password"
-        return render_template("index.html", error=error_message)
+        return render_template("index.html", message=error_message)
 
 
 @app.route('/checkUserAvaliability', methods=['GET'])
@@ -157,7 +157,8 @@ def NewUser():
     username = request.form.get('username')
     password = request.form.get('password')
     registration(username, password)
-    return redirect('/')
+    message = "You have successfully registered. Please sign in."
+    return render_template("index.html", message=message)
     
 
 @app.route("/logout")
