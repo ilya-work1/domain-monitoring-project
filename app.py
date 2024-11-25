@@ -8,7 +8,7 @@ from datetime import timedelta
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 from config import Config, logger
-
+from DataManagement import load_domains, remove_domain
 
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
@@ -197,13 +197,50 @@ def check_domains():
         print("Domains received:", domains)
 
         # Use existing check_url_mt function
-        results = check_url(domains)
+        results = check_url(domains, username)
         print("Results:", results)
 
         return jsonify(results)
     except Exception as e:
         return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
-   
+    
+@app.route('/get_domains', methods=['GET'])
+def get_domains():
+    try:
+        username = session.get('username')
+        if not username:
+            return jsonify({'message': 'You are not logged in!'}), 401
+        
+        # Get domains from database
+        data = load_domains(username)
+
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while reading domains data.', 'error': str(e)}), 500
+    
+
+@app.route('/remove_domain', methods=['DELETE'])
+def remove_domain():
+    try:
+        username = session.get('username')
+        if not username:
+            return jsonify({'message': 'You are not logged in!'}), 401
+        
+        data = request.get_json()
+        domain_to_remove = data.get('domain')
+        
+        if not domain_to_remove:
+                return jsonify({'message': 'No domain provided for deletion!'}), 400
+
+        # Suppression du domaine (implémentez la logique ici)
+        # Exemple : Appel à une fonction pour gérer la suppression dans la base de données
+        if remove_domain(domain_to_remove, username):  # Fonction fictive
+            return jsonify({'message': f'Domain {domain_to_remove} deleted successfully.'}), 200
+        else:
+            return jsonify({'message': f'Domain {domain_to_remove} not found or cannot be deleted.'}), 404
+
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while removing the domain.', 'error': str(e)}), 500
 
 
 if __name__ == '__main__':
