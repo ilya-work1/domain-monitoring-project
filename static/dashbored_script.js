@@ -6,10 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshAllButton = document.querySelector('.refresh-button');
     const tableBody = document.getElementById('domainsTableBody');
     const logoutButton = document.querySelector('.header-nav .logout-button');
-    
+ 
+
     // load the domains data on page load
     getDomainsData()
     
+
     // Logout Button
     logoutButton.addEventListener('click', function() {
         window.location.href = '/logout';
@@ -225,4 +227,110 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
     }
+});
+
+
+
+async function startSchedule() {
+    const domains = Array.from(tableBody.getElementsByTagName('tr'))
+        .map(row => row.cells[0].textContent);
+    
+    if (domains.length === 0) {
+        alert('Please add domains before starting the schedule.');
+        return;
+    }
+
+    try {
+        let response;
+        if (hourlyRadio.checked) {
+            response = await fetch('/schedule/hourly', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    domains: domains,
+                    interval: parseInt(hourlyInterval.value)
+                })
+            });
+        } else if (dailyRadio.checked) {
+            response = await fetch('/schedule/daily', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    domains: domains,
+                    time: dailyTime.value
+                })
+            });
+        }
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            startScheduleBtn.disabled = true;
+            stopScheduleBtn.disabled = false;
+            hourlyInterval.disabled = true;
+            dailyTime.disabled = true;
+            hourlyRadio.disabled = true;
+            dailyRadio.disabled = true;
+            nextRunTime.textContent = `Next check: ${new Date(result.next_run).toLocaleString()}`;
+        } else {
+            alert(`Failed to start schedule: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to start schedule. Please try again.');
+    }
+}
+
+
+async function stopSchedule() {
+    try {
+        const response = await fetch('/schedule/stop', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        if (result.status === 'success') {
+            startScheduleBtn.disabled = false;
+            stopScheduleBtn.disabled = true;
+            hourlyInterval.disabled = false;
+            dailyTime.disabled = false;
+            hourlyRadio.disabled = false;
+            dailyRadio.disabled = false;
+            nextRunTime.textContent = 'Next check: Not scheduled';
+        } else {
+            alert(`Failed to stop schedule: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to stop schedule. Please try again.');
+    }
+}
+
+
+async function checkScheduleStatus() {
+    try {
+        const response = await fetch('/schedule/status');
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.schedule) {
+            startScheduleBtn.disabled = true;
+            stopScheduleBtn.disabled = false;
+            hourlyInterval.disabled = true;
+            dailyTime.disabled = true;
+            hourlyRadio.disabled = true;
+            dailyRadio.disabled = true;
+            nextRunTime.textContent = `Next check: ${new Date(result.schedule.next_run).toLocaleString()}`;
+        }
+    } catch (error) {
+        console.error('Error checking schedule status:', error);
+    }
+}
+
+// Check schedule status when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    checkScheduleStatus();
 });
