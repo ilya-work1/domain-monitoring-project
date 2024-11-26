@@ -189,7 +189,8 @@ body {
 }
 
 .domains-table th:last-child {
-    padding-left: 2rem;  
+    padding-left: 1rem;  
+    
 }
 
 /* Status badges */
@@ -265,13 +266,6 @@ body {
     background-color: #d1fae5;
 }
 
-.edit-button {
-    color: #0891b2;
-}
-
-.edit-button:hover {
-    background-color: #cffafe;
-}
 
 .delete-button:hover {
     background-color: #fee2e2;

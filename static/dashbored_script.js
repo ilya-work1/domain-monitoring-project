@@ -173,9 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button class="button action-button check-button" data-tooltip="Check Status">
                     <span class="icon">⟳</span>
                 </button>
-                <button class="button action-button edit-button" data-tooltip="Edit Domain">
-                    <span class="icon">✎</span>
-                </button>
                 <button class="button action-button delete-button" data-tooltip="Delete Domain">
                     <span class="icon">×</span>
                 </button>
@@ -189,15 +186,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const checkButton = row.querySelector('.check-button');
         checkButton.addEventListener('click', () => checkMultipleDomains([domain]));
-
-        const editButton = row.querySelector('.edit-button');
-        editButton.addEventListener('click', function () {
-            const newDomain = prompt('Edit domain name:', domain);
-            if (newDomain && newDomain.trim() && newDomain !== domain) {
-                checkMultipleDomains([newDomain.trim()]);
-                row.remove();
-            }
-        });
 
         const deleteButton = row.querySelector('.delete-button');
         deleteButton.addEventListener('click', async function () {
