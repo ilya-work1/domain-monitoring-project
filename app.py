@@ -125,13 +125,15 @@ def schedule_status():
 
 @app.route("/google-login")
 def google_login():
-    # Find out what URL to hit for Google login
     google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
+    
+    #callback_url =
+    
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
+        redirect_uri=callback_url, 
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
@@ -144,10 +146,12 @@ def callback():
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
+        #callback_url =
+        
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
             authorization_response=request.url,
-            redirect_url=request.base_url,
+            redirect_url=callback_url,  
             code=code,
         )
         token_response = requests.post(

@@ -3,13 +3,24 @@ import json
 from flask import jsonify
 from config import logger
 
+
+
+def json_directory():
+    json_dir = 'Jsons'
+    if not os.path.exists(json_dir):
+        os.makedirs(json_dir)
+    return json_dir
+
+
 def load_domains(username):
     try:
-        if not os.path.exists(f'{username}_domains.json'):
-            with open(f'{username}_domains.json', 'w') as f:
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, f'{username}_domains.json')
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as f:
                 json.dump({"domains":[]}, f)
 
-        with open(f'{username}_domains.json', 'r') as f:
+        with open(file_path, 'r') as f:
             data = json.load(f)
         return data.get("domains")
     except Exception as e:
@@ -25,26 +36,33 @@ def add_domains(domains, username):
         return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
     
 def remove_domain(domain_to_remove, username):
-    domains = load_domains(username)
-    domain_found=False
-    
-    for i in range(len(domains)):
-        if domains[i]['url'] == domain_to_remove:
-            del domains[i]
-            domain_found=True
-            break
+    try:
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, f'{username}_domains.json')
+        domains = load_domains(username)
+        domain_found=False
+        
+        for i in range(len(domains)):
+            if domains[i]['url'] == domain_to_remove:
+                del domains[i]
+                domain_found=True
+                break
 
-    if domain_found:
-        with open(f'{username}_domains.json', 'w') as f:
-            json.dump({"domains": domains}, f, indent=4)
-        return True
-    else:     
-        return False
+        if domain_found:
+            with open(file_path, 'w') as f:
+                json.dump({"domains": domains}, f, indent=4)
+            return True
+        else:     
+            return False
+    except Exception as e:
+        return jsonify({'message': 'An error occurred while removing the domain.', 'error': str(e)})
 
     
 
 def update_domains(domains, username):
     try:
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, f'{username}_domains.json')
         # Load current domains
         current_domains = load_domains(username)
         
@@ -61,7 +79,7 @@ def update_domains(domains, username):
                 current_domains.append(domain)
         
         # Write updated domains back to file
-        with open(f'{username}_domains.json', 'w') as f:
+        with open(file_path, 'w') as f:
             json.dump({"domains": current_domains}, f, indent=4)
         
         return True
@@ -70,20 +88,23 @@ def update_domains(domains, username):
         return False
     
 
+    
 # schedular data management
 
 def load_user_tasks(username):
     """Charge les tâches planifiées d'un utilisateur depuis un fichier JSON."""
-    filename = f"{username}.json"
-    if os.path.exists(filename):
-        with open(filename, "r") as file:
+    json_dir = json_directory()
+    filepath = os.path.join(json_dir, f"{username}_tasks.json")
+    if os.path.exists(filepath):
+        with open(filepath, "r") as file:
             return json.load(file)
     return {"tasks": []}
 
 def save_user_tasks(username, tasks):
     """Sauvegarde les tâches planifiées d'un utilisateur dans un fichier JSON."""
-    filename = f"{username}.json"
-    with open(filename, "w") as file:
+    json_dir = json_directory()
+    filepath = os.path.join(json_dir, f"{username}_tasks.json")
+    with open(filepath, "w") as file:
         json.dump({"tasks": tasks}, file, indent=4)
 
 def update_user_task(username, new_task):
