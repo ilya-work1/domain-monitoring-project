@@ -364,6 +364,21 @@ body {
     cursor: pointer;
 }
 
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #09f;
+    border-radius: 50%;
+    animation: spin 1s ease infinite;
+    height: 40px;
+    width: 40px;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .cards-wrapper {
