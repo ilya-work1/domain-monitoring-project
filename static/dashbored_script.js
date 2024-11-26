@@ -321,14 +321,27 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('/schedule/status');
             const result = await response.json();
 
-            if (result.status === 'success' && result.schedule) {
+            if (result.status === 'success' && result.tasks) {
                 startScheduleBtn.disabled = true;
                 stopScheduleBtn.disabled = false;
                 hourlyInterval.disabled = true;
                 dailyTime.disabled = true;
                 hourlyRadio.disabled = true;
                 dailyRadio.disabled = true;
-                nextRunTime.textContent = `Next check: ${new Date(result.schedule.next_run).toLocaleString()}`;
+            if (result.tasks[0].next_run){
+                let date = new Date(result.tasks[0].next_run).toLocaleString('en-US', {
+                    dateStyle: 'short', 
+                    timeStyle: 'short'})
+                nextRunTime.textContent = `Next check: ${date}`;
+            }
+            }else{
+                startScheduleBtn.disabled = false;
+                stopScheduleBtn.disabled = true;
+                hourlyInterval.disabled = false;
+                dailyTime.disabled = false;
+                hourlyRadio.disabled = false;
+                dailyRadio.disabled = false;
+                nextRunTime.textContent = 'Next check: Not scheduled'
             }
         } catch (error) {
             console.error('Error checking schedule status:', error);

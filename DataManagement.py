@@ -1,6 +1,7 @@
 import os
 import json
 from flask import jsonify
+from config import logger
 
 def load_domains(username):
     try:
@@ -97,9 +98,10 @@ def update_user_task(username, new_task):
         tasks.append(new_task)
     save_user_tasks(username, tasks)
 
-def delete_user_task(username, job_id):
+def delete_user_task(username):
     """Supprime une tâche planifiée d'un utilisateur."""
-    tasks_data = load_user_tasks(username)
-    tasks = tasks_data.get("tasks", [])
-    tasks = [task for task in tasks if task["job_id"] != job_id]
+    #tasks_data = load_user_tasks(username)
+    #tasks = tasks_data.get("tasks", [])    
+    tasks = []
+    logger.debug(tasks)
     save_user_tasks(username, tasks)
