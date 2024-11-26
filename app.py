@@ -13,7 +13,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 
-
+# Initialize Flask application
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = True  
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
@@ -21,16 +21,26 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config.from_object(Config)
 Session(app)
 
+# Set up Google OAuth client
 client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
 
-# initialize scheduler object
+# Initialize scheduler for background tasks
 scheduler = BackgroundScheduler()
 scheduler.start()
 
+# Dictionary to store user-specific schedules
 user_schedules = {}
 
+
+"""
+------------------------------
+    routes for schedular
+------------------------------
+
+"""
+# Schedule a task to run hourly
 @app.route("/schedule/hourly", methods=["POST"])
-def schedule_hourly():
+def schedule_hourly():   
     username = session.get("username")
     if not username:
         return jsonify({"status": "error", "message": "Not logged in"}), 401
@@ -44,7 +54,7 @@ def schedule_hourly():
 
     job_id = f"{username}_hourly_task"
     scheduler.add_job(
-        func=check_url,  # Exemple : remplacer par une tâche utile
+        func=check_url,  #function for the task
         trigger=IntervalTrigger(hours=interval),
         args=[domains, username],
         id=job_id,
@@ -60,6 +70,7 @@ def schedule_hourly():
     update_user_task(username, new_task)
     return jsonify({"status": "success", "next_run": next_run.strftime("%Y-%m-%d %H:%M:%S")})
 
+# Schedule a task to run daily
 @app.route("/schedule/daily", methods=["POST"])
 def schedule_daily():
     username = session.get("username")
@@ -76,7 +87,7 @@ def schedule_daily():
 
     job_id = f"{username}_daily_task"
     scheduler.add_job(
-        func=check_url,  # Exemple : remplacer par une tâche utile
+        func=check_url, # function for the task
         trigger=CronTrigger(hour=hour, minute=minute),
         args=[domains, username],
         id=job_id,
@@ -92,6 +103,7 @@ def schedule_daily():
     update_user_task(username, new_task)
     return jsonify({"status": "success", "next_run": next_run.strftime("%Y-%m-%d %H:%M:%S")})
 
+# Stop all scheduled tasks for the current user
 @app.route("/schedule/stop", methods=["POST"])
 def stop_schedule():
     username = session.get("username")
@@ -99,14 +111,15 @@ def stop_schedule():
         return jsonify({"status": "error", "message": "Not logged in"}), 401
 
     #if username in user_schedules and user_schedules[username].get("job_id"):
-        job_id = user_schedules[username]["job_id"]        
-        scheduler.remove_job(job_id)
-        user_schedules.pop(username, None)
-        logger.debug('deleting task')
+       # job_id = user_schedules[username]["job_id"]        
+       # scheduler.remove_job(job_id)
+       # user_schedules.pop(username, None)
+       # logger.debug('deleting task')
     delete_user_task(username)
 
     return jsonify({"status": "success", "message": "Scheduler stopped for current user"})
 
+# Check the status of scheduled tasks
 @app.route("/schedule/status", methods=["GET"])
 def schedule_status():
     username = session.get("username")
@@ -120,14 +133,24 @@ def schedule_status():
         return jsonify({"status": "no task", "tasks": tasks})
 
 
+"""
+------------------------------
+   routes for google login
+------------------------------
 
+"""
+
+# Route to initiate Google Login
 @app.route("/google-login")
 def google_login():
+    """
+    Redirects the user to the Google login page to authenticate.
+    """
     google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     
-    #callback_url =
+    callback_url =""
     
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
@@ -136,15 +159,19 @@ def google_login():
     )
     return redirect(request_uri)
 
+# Callback route after Google login
 @app.route("/google-login/callback")
 def callback():
+    """
+    Handles the callback from Google login and sets up the user session.
+    """
     try:
         logger.debug("Processing Google login callback")
         code = request.args.get("code")
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
-        #callback_url =
+        callback_url =""
         
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
@@ -159,11 +186,13 @@ def callback():
             auth=(Config.GOOGLE_CLIENT_ID, Config.GOOGLE_CLIENT_SECRET),
         )
 
+        # Parse the tokens and fetch user information
         client.parse_request_body_response(json.dumps(token_response.json()))
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = client.add_token(userinfo_endpoint)
         userinfo_response = requests.get(uri, headers=headers, data=body)
 
+        # Check if email is verified and create/update user session
         if userinfo_response.json().get("email_verified"):
             user_data = userinfo_response.json()
             unique_id = user_data["sub"]
@@ -188,7 +217,7 @@ def callback():
             else:
                 logger.info(f"Existing Google user logged in: {users_email}")
 
-            # Set session data
+            # Set session data for the user
             session["username"] = users_email
             session["full_name"] = users_name
             session["profile_picture"] = profile_picture
@@ -203,46 +232,60 @@ def callback():
 
 
 
-
+# Home route
 @app.route("/")
 def index():
     """
-    Check if the users is logged in or not and redirect to the login or dashboard page"""
+    Redirects to the login page if the user is not logged in, otherwise to the dashboard.
+    """
     if not session.get("username"):
         # if not, then redirect to the login page
         return render_template("index.html")
     return render_template('dashboard.html', username=session.get("username"))
 
+# Serve favicon
 @app.route('/favicon.ico')
 def favicon():
     return app.send_static_file('favicon.ico')
 
+# Serve static files
 @app.route('/<filename>')
 def file(filename):
     return app.send_static_file(filename)
 
+"""
+------------------------------
+     routes for login
+------------------------------
 
+"""
+
+# Login route
 @app.route('/login', methods=['POST'])
 def login():
     """
-    Check login credentials and create flask session"""
+    Validates user credentials and creates a session.
+    """
     # Get input user from form
     username = request.form.get('username')
     password = request.form.get('password')
     print(f'username:{username}, password:{password}')
-    # Check credentials
+    # Validate credentials
     if check_login(username, password):
         session['username'] = username  # Create session
         print("you are logged in", session['username'])
-        return redirect("/")
+        return redirect("/")# Redirect to the dashboard
     else:
         print("you are not logged in")
         error_message = "Wrong Username or Password"
         return render_template("index.html", message=error_message)
 
-
+# Check username availability
 @app.route('/checkUserAvaliability', methods=['GET'])
 def checkUserAvaliability():
+    """
+    Checks if a username is available for registration.
+    """
     username = request.args.get('username')
     if check_username_avaliability(username):
         return { "available": True }
@@ -250,48 +293,42 @@ def checkUserAvaliability():
         return { "available": False }
 
 
-
+# Registration page
 @app.route('/register')
 def register():
     return render_template('registration.html')
 
+# Create a new user
 @app.route('/NewUser', methods=['POST'])
 def NewUser():
+    """
+    Handles new user registration.
+    """
     username = request.form.get('username')
     password = request.form.get('password')
-    registration(username, password)
+    registration(username, password) # Register the user
     message = "You have successfully registered. Please sign in."
     return render_template("index.html", message=message)
     
-
+# Logout route
 @app.route("/logout")
 def logout():
+    """
+    Clears the user's session and logs them out.
+    """
     username = session.get('username')
     session.clear()  # Clear all session data
     if username:
         logger.info(f"User logged out: {username}")
-    return redirect("/")
+    return redirect("/") # Redirect to the login page
 
 
-@app.route('/dashboard', methods=['GET'])
-def dashboard():
-    if 'username' in session:
-        # return render_template('dashboard.html')
-        return f'Welcome to your dashboard, {session["username"]}!'
-    return 'You are not logged in.', 401
-
-def check_username_domains(username):
-    if os.path.exists(f'{username}.json'):
-        with open(f'{username}.json', 'r') as f:
-            data = json.load(f)
-        return data.get('domains', [])
-    return []
-
-
-
-# Check domains route
+# Route to check domains
 @app.route('/check_domains', methods=['POST'])
 def check_domains():
+    """
+    Checks the status of domains provided by the user.
+    """
     try:
         username = session.get('username')
         if not username:
@@ -309,10 +346,15 @@ def check_domains():
 
         return jsonify(results)
     except Exception as e:
+        logger.error(f"Error occurred while checking domains: {str(e)}", exc_info=True)
         return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
-    
+
+# Route to retrieve user domains    
 @app.route('/get_domains', methods=['GET'])
 def get_domains():
+    """
+    Retrieves the list of domains saved for the logged-in user.
+    """
     try:
         username = session.get('username')
         if not username:
@@ -323,9 +365,10 @@ def get_domains():
 
         return jsonify(data)
     except Exception as e:
+        logger.error(f"Error occurred while retrieving domains: {str(e)}", exc_info=True)
         return jsonify({'message': 'An error occurred while reading domains data.', 'error': str(e)}), 500
     
-
+# Route to remove a domain from the database
 @app.route('/remove_domain', methods=['DELETE'])
 def remove_domain_from_database():
     try:
@@ -333,20 +376,20 @@ def remove_domain_from_database():
         if not username:
             return jsonify({'message': 'You are not logged in!'}), 401
         
-        
+        # Get the domain to be removed from query parameters
         domain_to_remove = request.args.get('domain')
         
         if not domain_to_remove:
                 return jsonify({'message': 'No domain provided for deletion!'}), 400
 
-        # Suppression du domaine (implémentez la logique ici)
-        # Exemple : Appel à une fonction pour gérer la suppression dans la base de données
-        if remove_domain(domain_to_remove, username):  # Fonction fictive
+        # Remove the domain using the appropriate function
+        if remove_domain(domain_to_remove, username):  
             return jsonify({'message': f'Domain {domain_to_remove} deleted successfully.'}), 200
         else:
             return jsonify({'message': f'Domain {domain_to_remove} not found or cannot be deleted.'}), 404
 
     except Exception as e:
+        logger.error(f"Error occurred while removing domain: {str(e)}", exc_info=True)
         return jsonify({'message': 'An error occurred while removing the domain.', 'error': str(e)}), 500
 
 
