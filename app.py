@@ -100,11 +100,12 @@ def stop_schedule():
     if not username:
         return jsonify({"status": "error", "message": "Not logged in"}), 401
 
-    if username in user_schedules and user_schedules[username].get("job_id"):
-        job_id = user_schedules[username]["job_id"]
+    #if username in user_schedules and user_schedules[username].get("job_id"):
+        job_id = user_schedules[username]["job_id"]        
         scheduler.remove_job(job_id)
         user_schedules.pop(username, None)
-        delete_user_task(username, job_id)
+        logger.debug('deleting task')
+    delete_user_task(username)
 
     return jsonify({"status": "success", "message": "Scheduler stopped for current user"})
 
@@ -115,7 +116,10 @@ def schedule_status():
         return jsonify({"status": "error", "message": "Not logged in"}), 401
 
     tasks = load_user_tasks(username).get("tasks", [])
-    return jsonify({"status": "success", "tasks": tasks})
+    if tasks:
+        return jsonify({"status": "success", "tasks": tasks})
+    else:
+        return jsonify({"status": "no task", "tasks": tasks})
 
 
 
