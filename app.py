@@ -184,21 +184,24 @@ def check_username_domains(username):
     return []
 
 
+
+# Check domains route
 @app.route('/check_domains', methods=['POST'])
 def check_domains():
     try:
         username = session.get('username')
         if not username:
+            logger.warning("User not logged in")
             return jsonify({'message': 'You are not logged in!'}), 401
         
         # Get domains from request body
         data = request.get_json()
         domains = data.get('domains', [])
-        print("Domains received:", domains)
+        logger.debug(f"Checking domains for user {username}: {domains}")
 
         # Use existing check_url_mt function
         results = check_url(domains, username)
-        print("Results:", results)
+        logger.info(f"Results: {results}")
 
         return jsonify(results)
     except Exception as e:
