@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Get DOM elements
     const domainInput = document.getElementById('domainInput');
     const addButton = document.querySelector('.add-button');
@@ -6,19 +6,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshAllButton = document.querySelector('.refresh-button');
     const tableBody = document.getElementById('domainsTableBody');
     const logoutButton = document.querySelector('.header-nav .logout-button');
- 
+
 
     // load the domains data on page load
     getDomainsData()
-    
+
+    // Check schedule status when page loads    
+    checkScheduleStatus();
+
 
     // Logout Button
-    logoutButton.addEventListener('click', function() {
+    logoutButton.addEventListener('click', function () {
         window.location.href = '/logout';
     });
 
     // Add Domain Button
-    addButton.addEventListener('click', function() {
+    addButton.addEventListener('click', function () {
         const domain = domainInput.value.trim();
         if (domain) {
             checkMultipleDomains([domain]);
@@ -27,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Enter key functionality for domain input
-    domainInput.addEventListener('keypress', function(e) {
+    domainInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             const domain = this.value.trim();
             if (domain) {
@@ -37,27 +40,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    
-    fileUpload.addEventListener('change', async function(e) {
+
+    fileUpload.addEventListener('change', async function (e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = async function (e) {
                 const domains = e.target.result.split('\n')
                     .map(domain => domain.trim())
                     .filter(domain => domain);
-                
+
                 // Basic domain validation regex
                 const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-                
+
                 const validDomains = domains.filter(domain => domainRegex.test(domain));
                 const invalidDomains = domains.filter(domain => !domainRegex.test(domain));
-                
+
                 // Create confirmation message
                 let confirmMessage = `Found ${domains.length} domains:\n`;
                 confirmMessage += `✓ ${validDomains.length} valid domains\n`;
                 confirmMessage += `✗ ${invalidDomains.length} invalid domains\n\n`;
-                
+
                 if (invalidDomains.length > 0) {
                     confirmMessage += 'Invalid domains:\n';
                     invalidDomains.forEach(domain => {
@@ -65,15 +68,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     confirmMessage += '\n';
                 }
-                
+
                 confirmMessage += 'Would you like to proceed with checking the valid domains?';
-                
+
                 // Show confirmation dialog
                 if (validDomains.length > 0 && confirm(confirmMessage)) {
                     // Send only valid domains to be checked
                     checkMultipleDomains(validDomains);
                 }
-                
+
                 // Reset file input
                 fileUpload.value = '';
             };
@@ -81,9 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    
+
     // Refresh All Button
-    refreshAllButton.addEventListener('click', function() {
+    refreshAllButton.addEventListener('click', function () {
         const rows = tableBody.getElementsByTagName('tr');
         const domains = Array.from(rows).map(row => row.cells[0].textContent);
         checkMultipleDomains(domains);
@@ -99,9 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ domains: domains })
             });
-            
+
             if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
-            
+
             const results = await response.json();
             results.forEach(result => addOrUpdateDomainRow(result));
         } catch (error) {
@@ -111,17 +114,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to display domains data from database user
-    async function getDomainsData(){
+    async function getDomainsData() {
         try {
             const response = await fetch('/get_domains', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                
+
             });
             if (!response.ok) throw new Error(`Failed to check domains. Status: ${response.status}`);
-            
+
             const results = await response.json();
             results.forEach(result => addOrUpdateDomainRow(result));
         } catch (error) {
@@ -130,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-  
+
 
     // Function to add or update domain row
     function addOrUpdateDomainRow(result) {
@@ -162,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to create row HTML
     function createRowHTML(result) {
         return `
-            <td>${result.url}</td>
+            <td class = "domain-name">${result.url}</td>
             <td><span class="status-badge ${result.status_code === 'OK' ? 'active' : 'failed'}">${result.status_code}</span></td>
             <td><span class="ssl-badge ${result.ssl_status}">${result.ssl_status}</span></td>
             <td>${result.expiration_date}</td><td>${result.issuer || 'Unknown'}</td>
@@ -183,12 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to add event listeners to row buttons
     function addRowEventListeners(row) {
         const domain = row.cells[0].textContent;
-        
+
         const checkButton = row.querySelector('.check-button');
         checkButton.addEventListener('click', () => checkMultipleDomains([domain]));
 
         const editButton = row.querySelector('.edit-button');
-        editButton.addEventListener('click', function() {
+        editButton.addEventListener('click', function () {
             const newDomain = prompt('Edit domain name:', domain);
             if (newDomain && newDomain.trim() && newDomain !== domain) {
                 checkMultipleDomains([newDomain.trim()]);
@@ -197,25 +200,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const deleteButton = row.querySelector('.delete-button');
-        deleteButton.addEventListener('click', async function() {
+        deleteButton.addEventListener('click', async function () {
             if (confirm('Are you sure you want to delete this domain?')) {
                 try {
                     // Envoie une requête au serveur pour supprimer le domaine
-                    const response = await fetch('/remove_domain', {
-                        method: 'DELETE', // Utiliser DELETE pour une action de suppression
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ domain: row.dataset.domain }) // Envoi de l'URL du domaine
+                    const domainElement = row.querySelector('.domain-name');
+                    const domain = encodeURIComponent(domainElement.innerHTML.trim());
+                    console.log(domain);
+                    const response = await fetch(`/remove_domain?domain=${domain}`, {
+                        method: 'DELETE', // DELETE sans body
                     });
-        
+
                     if (response.ok) {
                         // Si la suppression côté serveur réussit, on enlève la ligne de l'interface
                         row.remove();
                         alert('The domain has been successfully deleted.');
                     } else {
                         // Gérer les erreurs renvoyées par le serveur
-                        const errorMessage = await response.text();
+                        const errorMessage = await response.json();
                         alert(`Failed to delete domain: ${errorMessage}`);
                     }
                 } catch (error) {
@@ -225,112 +227,122 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        
+
     }
-});
 
 
+    const startScheduleBtn = document.getElementById("startSchedule");
+    const stopScheduleBtn = document.getElementById("stopSchedule");
+    const hourlyRadio = document.querySelector("input[value='hourly']");
+    const dailyRadio = document.querySelector("input[value='daily']");
+    const hourlyInterval = document.getElementById("hourlyInterval");
+    const dailyTime = document.getElementById("dailyTime");
+    const nextRunTime = document.getElementById("nextRunTime");
 
-async function startSchedule() {
-    const domains = Array.from(tableBody.getElementsByTagName('tr'))
-        .map(row => row.cells[0].textContent);
+    async function startSchedule() {
+        const domains = Array.from(tableBody.getElementsByTagName('tr'))
+            .map(row => row.cells[0].textContent);
+
+        if (domains.length === 0) {
+            alert('Please add domains before starting the schedule.');
+            return;
+        }
+
+        try {
+            let response;
+            if (hourlyRadio.checked) {
+                response = await fetch('/schedule/hourly', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                         interval: parseInt(hourlyInterval.value)
+                    })
+                });
+            } else if (dailyRadio.checked) {
+                response = await fetch('/schedule/daily', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        time: dailyTime.value
+                    })
+                });
+            }
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                startScheduleBtn.disabled = true;
+                stopScheduleBtn.disabled = false;
+                hourlyInterval.disabled = true;
+                dailyTime.disabled = true;
+                hourlyRadio.disabled = true;
+                dailyRadio.disabled = true;
+                nextRunTime.textContent = `Next check: ${new Date(result.next_run).toLocaleString()}`;
+            } else {
+                alert(`Failed to start schedule: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to start schedule. Please try again.');
+        }
+    }
+
+
+    async function stopSchedule() {
+        try {
+            const response = await fetch('/schedule/stop', {
+                method: 'POST'
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                startScheduleBtn.disabled = false;
+                stopScheduleBtn.disabled = true;
+                hourlyInterval.disabled = false;
+                dailyTime.disabled = false;
+                hourlyRadio.disabled = false;
+                dailyRadio.disabled = false;
+                nextRunTime.textContent = 'Next check: Not scheduled';
+            } else {
+                alert(`Failed to stop schedule: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to stop schedule. Please try again.');
+        }
+    }
+
+
+    async function checkScheduleStatus() {
+        try {
+            const response = await fetch('/schedule/status');
+            const result = await response.json();
+
+            if (result.status === 'success' && result.schedule) {
+                startScheduleBtn.disabled = true;
+                stopScheduleBtn.disabled = false;
+                hourlyInterval.disabled = true;
+                dailyTime.disabled = true;
+                hourlyRadio.disabled = true;
+                dailyRadio.disabled = true;
+                nextRunTime.textContent = `Next check: ${new Date(result.schedule.next_run).toLocaleString()}`;
+            }
+        } catch (error) {
+            console.error('Error checking schedule status:', error);
+        }
+    }
+
     
-    if (domains.length === 0) {
-        alert('Please add domains before starting the schedule.');
-        return;
-    }
+    
 
-    try {
-        let response;
-        if (hourlyRadio.checked) {
-            response = await fetch('/schedule/hourly', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    domains: domains,
-                    interval: parseInt(hourlyInterval.value)
-                })
-            });
-        } else if (dailyRadio.checked) {
-            response = await fetch('/schedule/daily', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    domains: domains,
-                    time: dailyTime.value
-                })
-            });
-        }
+    startScheduleBtn.addEventListener('click', function () {
+        startSchedule()
+    });
 
-        const result = await response.json();
-        if (result.status === 'success') {
-            startScheduleBtn.disabled = true;
-            stopScheduleBtn.disabled = false;
-            hourlyInterval.disabled = true;
-            dailyTime.disabled = true;
-            hourlyRadio.disabled = true;
-            dailyRadio.disabled = true;
-            nextRunTime.textContent = `Next check: ${new Date(result.next_run).toLocaleString()}`;
-        } else {
-            alert(`Failed to start schedule: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to start schedule. Please try again.');
-    }
-}
-
-
-async function stopSchedule() {
-    try {
-        const response = await fetch('/schedule/stop', {
-            method: 'POST'
-        });
-        
-        const result = await response.json();
-        if (result.status === 'success') {
-            startScheduleBtn.disabled = false;
-            stopScheduleBtn.disabled = true;
-            hourlyInterval.disabled = false;
-            dailyTime.disabled = false;
-            hourlyRadio.disabled = false;
-            dailyRadio.disabled = false;
-            nextRunTime.textContent = 'Next check: Not scheduled';
-        } else {
-            alert(`Failed to stop schedule: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to stop schedule. Please try again.');
-    }
-}
-
-
-async function checkScheduleStatus() {
-    try {
-        const response = await fetch('/schedule/status');
-        const result = await response.json();
-        
-        if (result.status === 'success' && result.schedule) {
-            startScheduleBtn.disabled = true;
-            stopScheduleBtn.disabled = false;
-            hourlyInterval.disabled = true;
-            dailyTime.disabled = true;
-            hourlyRadio.disabled = true;
-            dailyRadio.disabled = true;
-            nextRunTime.textContent = `Next check: ${new Date(result.schedule.next_run).toLocaleString()}`;
-        }
-    } catch (error) {
-        console.error('Error checking schedule status:', error);
-    }
-}
-
-// Check schedule status when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    checkScheduleStatus();
+    stopScheduleBtn.addEventListener('click', function () {
+        stopSchedule()
+    });
 });

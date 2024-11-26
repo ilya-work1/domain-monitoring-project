@@ -25,12 +25,20 @@ def add_domains(domains, username):
     
 def remove_domain(domain_to_remove, username):
     domains = load_domains(username)
-    for domain in domains:
-        if domain['url'] == domain_to_remove:
-            domains.remove(domain)
-            return True
-        else: 
-            return False
+    domain_found=False
+    
+    for i in range(len(domains)):
+        if domains[i]['url'] == domain_to_remove:
+            del domains[i]
+            domain_found=True
+            break
+
+    if domain_found:
+        with open(f'{username}_domains.json', 'w') as f:
+            json.dump({"domains": domains}, f, indent=4)
+        return True
+    else:     
+        return False
 
     
 
@@ -59,3 +67,39 @@ def update_domains(domains, username):
     except Exception as e:
         print(f"Error updating domains: {e}")
         return False
+    
+
+# schedular data management
+
+def load_user_tasks(username):
+    """Charge les tâches planifiées d'un utilisateur depuis un fichier JSON."""
+    filename = f"{username}.json"
+    if os.path.exists(filename):
+        with open(filename, "r") as file:
+            return json.load(file)
+    return {"tasks": []}
+
+def save_user_tasks(username, tasks):
+    """Sauvegarde les tâches planifiées d'un utilisateur dans un fichier JSON."""
+    filename = f"{username}.json"
+    with open(filename, "w") as file:
+        json.dump({"tasks": tasks}, file, indent=4)
+
+def update_user_task(username, new_task):
+    """Ajoute ou met à jour une tâche existante pour un utilisateur."""
+    tasks_data = load_user_tasks(username)
+    tasks = tasks_data.get("tasks", [])
+    for task in tasks:
+        if task["job_id"] == new_task["job_id"]:
+            task.update(new_task)
+            break
+    else:
+        tasks.append(new_task)
+    save_user_tasks(username, tasks)
+
+def delete_user_task(username, job_id):
+    """Supprime une tâche planifiée d'un utilisateur."""
+    tasks_data = load_user_tasks(username)
+    tasks = tasks_data.get("tasks", [])
+    tasks = [task for task in tasks if task["job_id"] != job_id]
+    save_user_tasks(username, tasks)
