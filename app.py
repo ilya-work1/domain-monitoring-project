@@ -127,7 +127,7 @@ def google_login():
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     
-    #callback_url =""
+    callback_url =""
     
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
@@ -144,7 +144,7 @@ def callback():
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
-        #callback_url =""
+        callback_url =""
         
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
