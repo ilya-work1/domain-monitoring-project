@@ -87,22 +87,23 @@ def update_domains(domains, username):
         return False
     
 
+    
 # schedular data management
 
 def load_user_tasks(username):
     """Charge les tâches planifiées d'un utilisateur depuis un fichier JSON."""
     json_dir = json_directory()
-    file_path = os.path.join(json_dir, f'{username}_domains.json')
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
+    filepath = os.path.join(json_dir, f"{username}_tasks.json")
+    if os.path.exists(filepath):
+        with open(filepath, "r") as file:
             return json.load(file)
     return {"tasks": []}
 
 def save_user_tasks(username, tasks):
     """Sauvegarde les tâches planifiées d'un utilisateur dans un fichier JSON."""
     json_dir = json_directory()
-    file_path = os.path.join(json_dir, f'{username}_domains.json')
-    with open(file_path, "w") as file:
+    filepath = os.path.join(json_dir, f"{username}_tasks.json")
+    with open(filepath, "w") as file:
         json.dump({"tasks": tasks}, file, indent=4)
 
 def update_user_task(username, new_task):
