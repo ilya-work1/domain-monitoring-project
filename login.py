@@ -1,18 +1,20 @@
 import json
 import os
 from config import logger
-
+from DataManagement import json_directory
 
 
 def initialize_users_file():
     """Creates users.json if it doesn't exist"""
     try:
-        if not os.path.exists('users.json'):
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, 'users.json')
+        if not os.path.exists(file_path):
             logger.info("Creating new users.json file")
             default_structure = {
                 "users": []
             }
-            with open('users.json', 'w') as f:
+            with open(file_path, 'w') as f:
                 json.dump(default_structure, f, indent=4)
             logger.info("users.json created successfully")
     except Exception as e:
@@ -25,7 +27,9 @@ def check_login(username, password):
     initialize_users_file()
 
     try:
-        with open('users.json', 'r') as f:
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, 'users.json')
+        with open(file_path, 'r') as f:
             users_file = json.load(f)
 
         users_file = users_file.get('users')
@@ -53,7 +57,9 @@ def check_username_avaliability(username):
     initialize_users_file()
 
     try:
-        with open('users.json', 'r') as f:
+        json_dir = json_directory()
+        file_path = os.path.join(json_dir, 'users.json')
+        with open(file_path, 'r') as f:
             users_file = json.load(f)
 
         users_file = users_file.get('users')
@@ -82,19 +88,23 @@ def registration(username, password, full_name=None, is_google_user=False, profi
                 'profile_picture': profile_picture
             }
 
-            with open('users.json', 'r') as f:
+            json_dir = json_directory()
+            file_path = os.path.join(json_dir, 'users.json')
+            with open(file_path, 'r') as f:
                 users_file = json.load(f)
 
             users_file['users'].append(NewUser)
 
-            with open('users.json', 'w') as f:
+            with open(file_path, 'w') as f:
                 json.dump(users_file, f, indent=4)
             
             user_type = "Google" if is_google_user else "regular"
             logger.info(f"New {user_type} user registered: {username}")
         else:
             # If user exists and it's a Google login attempt, log appropriately
-            with open('users.json', 'r') as f:
+            json_dir = json_directory()
+            file_path = os.path.join(json_dir, 'users.json')
+            with open(file_path, 'r') as f:
                 users_file = json.load(f)
             
             for user in users_file.get('users', []):
