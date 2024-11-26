@@ -92,7 +92,7 @@ def update_domains(domains, username):
 # schedular data management
 
 def load_user_tasks(username):
-    """Charge les tâches planifiées d'un utilisateur depuis un fichier JSON."""
+    """Loads the scheduled tasks of a user from a JSON file."""
     json_dir = json_directory()
     filepath = os.path.join(json_dir, f"{username}_tasks.json")
     if os.path.exists(filepath):
@@ -101,14 +101,14 @@ def load_user_tasks(username):
     return {"tasks": []}
 
 def save_user_tasks(username, tasks):
-    """Sauvegarde les tâches planifiées d'un utilisateur dans un fichier JSON."""
+    """Saves the scheduled tasks of a user into a JSON file."""
     json_dir = json_directory()
     filepath = os.path.join(json_dir, f"{username}_tasks.json")
     with open(filepath, "w") as file:
         json.dump({"tasks": tasks}, file, indent=4)
 
 def update_user_task(username, new_task):
-    """Ajoute ou met à jour une tâche existante pour un utilisateur."""
+    """Adds or updates an existing task for a user."""
     tasks_data = load_user_tasks(username)
     tasks = tasks_data.get("tasks", [])
     for task in tasks:
@@ -120,7 +120,7 @@ def update_user_task(username, new_task):
     save_user_tasks(username, tasks)
 
 def delete_user_task(username):
-    """Supprime une tâche planifiée d'un utilisateur."""
+    """Deletes all scheduled tasks for a user."""
     #tasks_data = load_user_tasks(username)
     #tasks = tasks_data.get("tasks", [])    
     tasks = []
