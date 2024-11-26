@@ -14,8 +14,6 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' 
-
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = True  
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
