@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const refreshAllButton = document.querySelector('.refresh-button');
     const tableBody = document.getElementById('domainsTableBody');
     const logoutButton = document.querySelector('.header-nav .logout-button');
-
+    const Spinner = document.getElementById('spinner');
 
     // load the domains data on page load
     getDomainsData()
@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // Check schedule status when page loads    
     checkScheduleStatus();
 
+     // Function to toggle spinner visibility
+     function spinner(flag) {
+        console.log(`Spinner is toggled! with ${flag}`);
+        // Spinner.style.display = flag ? 'block' : 'none';
+        // same as 
+        if (flag) { 
+            Spinner.style.display = 'block'; 
+        } else { 
+            Spinner.style.display = 'none';
+        }
+    }
 
     // Logout Button
     logoutButton.addEventListener('click', function () {
@@ -94,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to check multiple domains
     async function checkMultipleDomains(domains) {
+        spinner(true);
         try {
             const response = await fetch('/check_domains', {
                 method: 'POST',
@@ -111,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error:', error);
             alert('Error checking multiple domains. Please try again. Details: ' + error.message);
         }
+        spinner(false)
     }
 
     // Function to display domains data from database user
