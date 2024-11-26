@@ -56,7 +56,7 @@ def setup_logger():
     
     # Console handler (INFO and higher for cleaner console)
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
     
     # Add handlers
