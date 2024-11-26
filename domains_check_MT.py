@@ -68,7 +68,6 @@ def check_certificate(url):
         logger.info(f"SSL certificate valid for {url}: expires {expiry_date}")
         return ('valid', expiry_date.strftime("%Y-%m-%d %H:%M:%S"), issuer.get('commonName', 'unknown'))
     except Exception as e:
-        logger.error(f"SSL Error with {url}: {e}", exc_info=True)
         return ('failed', 'unknown', 'unknown')
 
 
