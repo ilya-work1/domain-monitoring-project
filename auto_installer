@@ -1,5 +1,4 @@
 #!/bin/bash
-apt-get -y update
 git clone https://github.com/ilya-work1/domain-monitoring-project.git
 cd domain-monitoring-project
 pip install requirements.txt --break-system-packages
