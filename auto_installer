@@ -1,6 +1,6 @@
 #!/bin/bash
 apt install python3-pip
 git clone https://github.com/ilya-work1/domain-monitoring-project.git
-pip install -r domain-monitoring-project\requirements.txt --break-system-packages
+pip install -r domain-monitoring-project/requirements.txt --break-system-packages
 cd domain-monitoring-project
 python3 app.py
