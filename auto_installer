@@ -1,7 +1,37 @@
 #!/bin/bash
+sudo -i
+
+#create directory for the app
+mkdir /nordic
+chmod -R 777 /nordic
+cd /nordic
+
+#update and upgrade apt
 sudo apt update && sudo apt upgrade -y
+
+#copy app file add install all requirements
 apt install python3-pip -y
 git clone https://github.com/ilya-work1/domain-monitoring-project.git
 pip install -r domain-monitoring-project/requirements.txt --break-system-packages
-cd domain-monitoring-project
-python3 app.py
+
+#Create service file
+cd /etc/systemd/system
+cat << EOF > "domainmonitoring.service"
+[Unit]
+description=Domain Monitoring Project Service
+after=network.target
+
+[Service]
+User=root
+WorkingDirectory=/nordic/DomainMonitoringProject
+ExecStart=/usr/bin/python3 /nordic/domain-monitoring-project/app.py
+restart=always
+
+[Instal]
+WantedBy=multi-user.target
+EOF
+
+#start and check the service
+sudo systemctl deamon-reload
+sudo systemctl start domainmonitoring.service
+sudo systemctl status domainmonitoring.service
