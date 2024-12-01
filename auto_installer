@@ -32,6 +32,6 @@ WantedBy=multi-user.target
 EOF
 
 #start and check the service
-sudo systemctl deamon-reload
+sudo systemctl daemon-reload
 sudo systemctl start domainmonitoring.service
 sudo systemctl status domainmonitoring.service
