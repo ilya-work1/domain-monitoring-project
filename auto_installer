@@ -3,7 +3,7 @@ sudo -i
 
 #create directory for the app
 mkdir /nordic
-chmod -R 777 /nordic
+chmod -R 755 /nordic
 cd /nordic
 
 #update and upgrade apt
@@ -16,6 +16,8 @@ pip install -r domain-monitoring-project/requirements.txt --break-system-package
 
 #Create service file
 cd /etc/systemd/system
+touch domainmonitoring.service
+chmod 755 domainmonitoring.service
 cat << EOF > "domainmonitoring.service"
 [Unit]
 description=Domain Monitoring Project Service
@@ -27,11 +29,12 @@ WorkingDirectory=/nordic/DomainMonitoringProject
 ExecStart=/usr/bin/python3 /nordic/domain-monitoring-project/app.py
 restart=always
 
-[Instal]
+[Install]
 WantedBy=multi-user.target
 EOF
 
 #start and check the service
 sudo systemctl daemon-reload
 sudo systemctl start domainmonitoring.service
+sudo systemctl enable domainmonitoring.service
 sudo systemctl status domainmonitoring.service
