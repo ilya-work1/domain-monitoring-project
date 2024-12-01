@@ -25,7 +25,7 @@ after=network.target
 
 [Service]
 User=root
-WorkingDirectory=/nordic/DomainMonitoringProject
+WorkingDirectory=/nordic/domain-monitoring-project
 ExecStart=/usr/bin/python3 /nordic/domain-monitoring-project/app.py
 restart=always
 
