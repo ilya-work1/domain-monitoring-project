@@ -9,15 +9,15 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Update the system
-echo "Updating system packages"
+echo "Updating system packages..."
 apt update && apt upgrade -y
 
 # Install Docker
-echo "Installing Docker"
+echo "Installing Docker..."
 apt install docker.io -y
 
 # Enable & start Docker service
-echo "Enabling and starting Docker service"
+echo "Enabling and starting Docker service..."
 systemctl enable docker
 systemctl start docker
 
@@ -26,7 +26,11 @@ echo "Setting up application directory..."
 mkdir -p /root/domain-monitoring-docker
 cd /root/domain-monitoring-docker
 
-# Creating Dockerfile
+# Clone repository
+echo "Cloning application repository..."
+git clone https://github.com/ilya-work1/domain-monitoring-project.git .
+
+# Create Dockerfile
 echo "Creating Dockerfile..."
 cat << EOF > Dockerfile
 FROM python:3.9-slim
@@ -47,16 +51,12 @@ EXPOSE 8081
 CMD ["python", "app.py"]
 EOF
 
-# Copy files from git
-echo "Cloning application files..."
-git clone https://github.com/ilya-work1/domain-monitoring-project.git .
-
 # Build the Docker image
-echo "Building the Docker image..."
+echo "Building Docker image..."
 docker build -t domain-monitoring-app .
 
-# Configure and run the container
-echo "Configuring and running the container..."
+# Run the Docker container
+echo "Running Docker container..."
 docker run -d --name domain-monitoring-container -p 8081:8081 domain-monitoring-app
 
 # Check running containers
