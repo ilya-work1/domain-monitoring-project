@@ -1,0 +1,78 @@
+
+SOP: Setting Up Domain Monitoring Project and Service
+
+1. Creating an Instance:
+   - Log in to your cloud provider (e.g., AWS, Azure, GCP).
+   - Create a new virtual machine (VM) or instance:
+     - Operating System: Choose Ubuntu (e.g., Ubuntu 20.04).
+     - Instance Type: Select an instance type based on your application's resource requirements (e.g., t2.micro for testing, t2.medium for production).
+     - Storage: Allocate enough storage space for your application and logs.
+     - Security Group: Ensure SSH access (port 22) is enabled and that you have permissions to open custom ports (e.g., 8081).
+   - Download the private key (.pem file) when creating the instance.
+   - Obtain the instance’s public IP address from your cloud provider.
+
+2. Connecting to the Server:
+   - Use SSH to connect to the server:
+     ssh -i <key>.pem ubuntu@<IP_ADDRESS>
+
+
+3. Switch to Root User:
+   - Run the following command to switch to the root user:
+     sudo -i
+
+4. Create a Directory for the Application:
+   - Create the `/nordic` directory and set appropriate permissions:
+     mkdir /nordic
+     chmod -R 755 /nordic
+     cd /nordic
+
+5. Update and Upgrade the System:
+   - Update the system packages and upgrade to the latest versions:
+     sudo apt update && sudo apt upgrade -y
+
+6. Install Required Tools and Clone the Application:
+   - Install Python3 pip:
+     apt install python3-pip -y
+
+   - Clone the application repository from GitHub:
+     git clone https://github.com/ilya-work1/domain-monitoring-project.git
+
+   - Install the required Python libraries:
+     pip install -r domain-monitoring-project/requirements.txt --break-system-packages
+
+7. Create the Systemd Service File:
+   - Navigate to the systemd directory:
+     cd /etc/systemd/system
+
+   - Create the service file and set appropriate permissions:
+     touch domainmonitoring.service
+     chmod 755 domainmonitoring.service
+
+   - Add the following configuration to the service file:
+     cat << EOF > "domainmonitoring.service"
+     [Unit]
+     Description=Domain Monitoring Project Service
+     After=network.target
+
+     [Service]
+     User=root
+     WorkingDirectory=/nordic/domain-monitoring-project
+     ExecStart=/usr/bin/python3 /nordic/domain-monitoring-project/app.py
+     Restart=always
+
+     [Install]
+     WantedBy=multi-user.target
+     EOF
+
+8. Start and Enable the Service:
+   - Reload the systemd configuration:
+     sudo systemctl daemon-reload
+
+   - Start the service:
+     sudo systemctl start domainmonitoring.service
+
+   - Enable the service to start on boot:
+     sudo systemctl enable domainmonitoring.service
+
+   - Check the service status:
+     sudo systemctl status domainmonitoring.service
