@@ -49,7 +49,8 @@ SOP: Setting Up Domain Monitoring Project and Service
      chmod 755 domainmonitoring.service
 
    - Add the following configuration to the service file:
-     cat << EOF > "domainmonitoring.service"
+     Create  "domainmonitoring.service" with vi :
+     vi domainmonitoring.service
      [Unit]
      Description=Domain Monitoring Project Service
      After=network.target
