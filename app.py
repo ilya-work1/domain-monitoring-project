@@ -21,6 +21,8 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config.from_object(Config)
 Session(app)
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT']='1'
+
 # Set up Google OAuth client
 client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
 
@@ -150,7 +152,7 @@ def google_login():
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     
-    callback_url =""
+    callback_url = Config.CallbackUrl
     
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
@@ -171,7 +173,7 @@ def callback():
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
-        callback_url =""
+        callback_url = Config.CallbackUrl
         
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
