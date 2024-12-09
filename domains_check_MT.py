@@ -81,9 +81,9 @@ def check_url_mt(domains, username):
         else:
             urls_queue.put(domain)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        logger.info("Starting 20 threads for URL processing")
-        for _ in range(20):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        logger.info("Starting 100 threads for URL processing")
+        for _ in range(100):
             executor.submit(check_url)
 
     urls_queue.join()

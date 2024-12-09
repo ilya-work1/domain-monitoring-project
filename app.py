@@ -12,6 +12,7 @@ from DataManagement import load_domains, remove_domain, update_user_task, delete
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
+import time
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -338,10 +339,20 @@ def check_domains():
         # Get domains from request body
         data = request.get_json()
         domains = data.get('domains', [])
-        logger.debug(f"Checking domains for user {username}: {domains}")
+        logger.info(f"User {username} started checking {len(domains)} domains.")
+    
+        #Start timing 
+        start_time = time.time()
+
 
         # Use existing check_url_mt function
         results = check_url(domains, username)
+
+        #Measure time taken
+        elapsed_time = time.time() - start_time
+        logger.info(f"Performance Summary for {username}: Checked {len(domains)} domains in {elapsed_time:.2f} seconds.")
+
+
         logger.info(f"Results: {results}")
 
         return jsonify(results)
