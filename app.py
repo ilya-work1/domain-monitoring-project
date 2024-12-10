@@ -279,8 +279,8 @@ def login():
         return redirect("/")# Redirect to the dashboard
     else:
         print("you are not logged in")
-        error_message = "Wrong Username or Password"
-        return render_template("index.html", message=error_message)
+        message = "Wrong Username or Password"
+        return render_template("index.html", error_message=message)
 
 # Check username availability
 @app.route('/checkUserAvaliability', methods=['GET'])
@@ -310,7 +310,7 @@ def NewUser():
     password = request.form.get('password')
     registration(username, password) # Register the user
     message = "You have successfully registered. Please sign in."
-    return render_template("index.html", message=message)
+    return render_template("index.html", positive_message=message)
     
 # Logout route
 @app.route("/logout")
@@ -335,7 +335,7 @@ def check_domains():
         username = session.get('username')
         if not username:
             logger.warning("User not logged in")
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get domains from request body
         data = request.get_json()
@@ -360,7 +360,7 @@ def get_domains():
     try:
         username = session.get('username')
         if not username:
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get domains from database
         data = load_domains(username)
@@ -376,7 +376,7 @@ def remove_domain_from_database():
     try:
         username = session.get('username')
         if not username:
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get the domain to be removed from query parameters
         domain_to_remove = request.args.get('domain')
