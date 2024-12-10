@@ -18,6 +18,7 @@ def check_url():
     """Check single URL status and SSL"""
     while not urls_queue.empty():
         url = urls_queue.get()
+         
         logger.info(f"Starting check for URL: {url}")
         result = {
             'url': url, 
@@ -28,6 +29,7 @@ def check_url():
         }
 
         try:
+            url =  url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
             ssl_status, expiry_date, issuer_name = check_certificate(url)
             response = requests.get(f'http://{url}', timeout=1)
             if response.status_code == 200:
@@ -55,7 +57,7 @@ def check_certificate(url):
     logger.debug(f"Checking SSL certificate for: {url}")
     try:
 
-        hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
+        hostname = url
 
         context = ssl.create_default_context()
         with socket.create_connection((hostname, 443),timeout=5) as sock:
