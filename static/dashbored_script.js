@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fileUpload.addEventListener('change', async function (e) {
         const file = e.target.files[0];
+        
         if (file) {
+            if (file.name.endsWith(".txt")){
             const reader = new FileReader();
             reader.onload = async function (e) {
                 const domains = e.target.result.split('\n')
@@ -62,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .filter(domain => domain);
 
                 // Basic domain validation regex
-                const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+                const domainRegex = /^(?:https?:\/\/|https?:\/\/www\.|www\.)?(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
                 const validDomains = domains.filter(domain => domainRegex.test(domain));
                 const invalidDomains = domains.filter(domain => !domainRegex.test(domain));
@@ -92,7 +94,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 fileUpload.value = '';
             };
             reader.readAsText(file);
+        }else {
+            alert("Please enter a txt file")
         }
+    }
     });
 
 

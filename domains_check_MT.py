@@ -18,6 +18,7 @@ def check_url():
     """Check single URL status and SSL"""
     while not urls_queue.empty():
         url = urls_queue.get()
+         
         logger.info(f"Starting check for URL: {url}")
         result = {
             'url': url, 
@@ -28,6 +29,7 @@ def check_url():
         }
 
         try:
+            url =  url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
             ssl_status, expiry_date, issuer_name = check_certificate(url)
             response = requests.get(f'http://{url}', timeout=1)
             if response.status_code == 200:
@@ -55,7 +57,7 @@ def check_certificate(url):
     logger.debug(f"Checking SSL certificate for: {url}")
     try:
 
-        hostname = url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
+        hostname = url
 
         context = ssl.create_default_context()
         with socket.create_connection((hostname, 443),timeout=5) as sock:
@@ -81,9 +83,9 @@ def check_url_mt(domains, username):
         else:
             urls_queue.put(domain)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        logger.info("Starting 20 threads for URL processing")
-        for _ in range(20):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        logger.info("Starting 100 threads for URL processing")
+        for _ in range(100):
             executor.submit(check_url)
 
     urls_queue.join()
