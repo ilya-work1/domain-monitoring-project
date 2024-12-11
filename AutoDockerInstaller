@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Script to deploy the application using Docker
+# Script to deploy the application using Docker and push image to Docker Hub
 
 # Ensure the script is run as root
 if [ "$(id -u)" -ne 0 ]; then
   echo "This script must be run as root" >&2
   exit 1
 fi
+
+# Docker Hub credentials
+DOCKER_USERNAME="razielrey"
+DOCKER_REPOSITORY="domainmonitoring"
+DOCKER_TAG="1.0.1"
 
 # Update the system
 echo "Updating system packages..."
@@ -30,36 +35,22 @@ cd /root/domain-monitoring-docker
 echo "Cloning application repository..."
 git clone https://github.com/ilya-work1/domain-monitoring-project.git .
 
-# Create Dockerfile
-echo "Creating Dockerfile..."
-cat << EOF > Dockerfile
-FROM python:3.9-slim
+# Build the Docker image using the existing dockerbuild file
+echo "Building Docker image using existing dockerbuild file..."
+docker build -t ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG} -f dockerbuild .
 
-# Set working directory
-WORKDIR /app
+# Push the image to Docker Hub
+echo "Logging in to Docker Hub..."
+docker login -u "${DOCKER_USERNAME}"
 
-# Copy application files
-COPY . /app
-
-# Install dependencies
-RUN pip install -r requirements.txt
-
-# Expose the required port
-EXPOSE 8081
-
-# Start the application
-CMD ["python", "app.py"]
-EOF
-
-# Build the Docker image
-echo "Building Docker image..."
-docker build -t domain-monitoring-app .
+echo "Pushing Docker image to Docker Hub..."
+docker push ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG}
 
 # Run the Docker container
 echo "Running Docker container..."
-docker run -d --name domain-monitoring-container -p 8081:8081 domain-monitoring-app
+docker run -d --name domain-monitoring-container -p 8080:8080 ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG}
 
 # Check running containers
 docker ps
 
-echo "Deployment completed using Docker!"
+echo "Deployment completed with version ${DOCKER_TAG} and pushed to Docker Hub on port 8080!"
