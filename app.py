@@ -12,6 +12,7 @@ from DataManagement import load_domains, remove_domain, update_user_task, delete
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
+import time
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -20,6 +21,8 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config.from_object(Config)
 Session(app)
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT']='1'
 
 # Set up Google OAuth client
 client = WebApplicationClient(Config.GOOGLE_CLIENT_ID)
@@ -150,7 +153,7 @@ def google_login():
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     
-    callback_url =""
+    callback_url = Config.CallbackUrl
     
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
@@ -171,7 +174,7 @@ def callback():
         google_provider_cfg = requests.get(Config.GOOGLE_DISCOVERY_URL).json()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
-        callback_url =""
+        callback_url = Config.CallbackUrl
         
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
@@ -277,8 +280,8 @@ def login():
         return redirect("/")# Redirect to the dashboard
     else:
         print("you are not logged in")
-        error_message = "Wrong Username or Password"
-        return render_template("index.html", message=error_message)
+        message = "Wrong Username or Password"
+        return render_template("index.html", error_message=message)
 
 # Check username availability
 @app.route('/checkUserAvaliability', methods=['GET'])
@@ -308,7 +311,7 @@ def NewUser():
     password = request.form.get('password')
     registration(username, password) # Register the user
     message = "You have successfully registered. Please sign in."
-    return render_template("index.html", message=message)
+    return render_template("index.html", positive_message=message)
     
 # Logout route
 @app.route("/logout")
@@ -333,15 +336,25 @@ def check_domains():
         username = session.get('username')
         if not username:
             logger.warning("User not logged in")
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get domains from request body
         data = request.get_json()
         domains = data.get('domains', [])
-        logger.debug(f"Checking domains for user {username}: {domains}")
+        logger.info(f"User {username} started checking {len(domains)} domains.")
+    
+        #Start timing 
+        start_time = time.time()
+
 
         # Use existing check_url_mt function
         results = check_url(domains, username)
+
+        #Measure time taken
+        elapsed_time = time.time() - start_time
+        logger.info(f"Performance Summary for {username}: Checked {len(domains)} domains in {elapsed_time:.2f} seconds.")
+
+
         logger.info(f"Results: {results}")
 
         return jsonify(results)
@@ -358,7 +371,7 @@ def get_domains():
     try:
         username = session.get('username')
         if not username:
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get domains from database
         data = load_domains(username)
@@ -374,7 +387,7 @@ def remove_domain_from_database():
     try:
         username = session.get('username')
         if not username:
-            return jsonify({'message': 'You are not logged in!'}), 401
+            return redirect("/")
         
         # Get the domain to be removed from query parameters
         domain_to_remove = request.args.get('domain')
