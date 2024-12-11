@@ -37,7 +37,7 @@ git clone https://github.com/ilya-work1/domain-monitoring-project.git .
 
 # Build the Docker image using the existing dockerbuild file
 echo "Building Docker image using existing dockerbuild file..."
-docker build -t ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG} -f dockerbuild .
+docker build -t ${DOCKER_USERNAME}/${DOCKER_REPOSITORY}:${DOCKER_TAG} -f Dockerfile .
 
 # Push the image to Docker Hub
 echo "Logging in to Docker Hub..."
