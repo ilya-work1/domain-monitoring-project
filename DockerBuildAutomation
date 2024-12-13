@@ -1,6 +1,6 @@
 #!/bin/bash
-sudo apt update && apt upgrade -y
-sudo apt install docker.io -y
+apt update && apt upgrade -y
+apt install docker.io -y
 echo "Please enter your Docker Hub credentials:"
 docker login
 if [ $? -ne 0 ]; then
