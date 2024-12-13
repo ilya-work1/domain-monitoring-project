@@ -2,7 +2,14 @@
 sudo -i
 apt update && apt upgrade -y
 apt install docker.io -y
+echo "Please enter your Docker Hub credentials:"
 docker login
+if [ $? -ne 0 ]; then
+    echo "Docker login failed. Exiting..."
+    exit 1
+fi
+echo "Login successful, continuing with script..."
 git clone https://github.com/ilya-work1/domain-monitoring-project.git
+cd domain-monitoring-project/
 docker build -t ilyashev1/monitorsystem:1.0.0 .
 docker push ilyashev1/monitorsystem:1.0.0
