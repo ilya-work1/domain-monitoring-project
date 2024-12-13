@@ -11,6 +11,8 @@ __pycache__/
 
 # .gitignore
 .env
+.env.*
+.env
 __pycache__/
 flask_session/
 *.pyc
