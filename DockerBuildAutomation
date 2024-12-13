@@ -2,6 +2,7 @@
 sudo -i
 apt update && apt upgrade -y
 apt install docker.io
+docker login
 git clone https://github.com/ilya-work1/domain-monitoring-project.git
 docker build -t ilyashev1/monitorsystem:1.0.0 .
 docker push ilyashev1/monitorsystem:1.0.0
