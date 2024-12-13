@@ -1,8 +1,9 @@
 #!/bin/bash
+DOCKER_USERNAME=$1
+DOCKER_PASSWORD=$2
 apt update && apt upgrade -y
 apt install docker.io -y
-echo "Please enter your Docker Hub credentials:"
-docker login
+echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
 if [ $? -ne 0 ]; then
     echo "Docker login failed. Exiting..."
     exit 1
