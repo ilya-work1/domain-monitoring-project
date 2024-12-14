@@ -17,6 +17,6 @@ logging.basicConfig(
     ]
 )
 
-url='http://ec2-54-200-248-130.us-west-2.compute.amazonaws.com:8080'
+url=''
 test_email=os.getenv('test_email')
 test_password=os.getenv('test_password')
