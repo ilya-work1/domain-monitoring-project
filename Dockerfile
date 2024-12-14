@@ -1,14 +1,7 @@
-
 FROM python
-
-# Set working directory
-WORKDIR /app
-
-# Copy application files
-COPY . /app
-
-# Install dependencies
+RUN mkdir /monitoring_app
+RUN chmod 777 /monitoring_app
+COPY . /monitoring_app
+WORKDIR /monitoring_app
 RUN pip install -r requirements.txt
-
-# Start the application
 CMD ["python", "app.py"]
