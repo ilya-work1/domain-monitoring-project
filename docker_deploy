@@ -1,5 +1,6 @@
 #!/bin/bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update
 sudo apt -y install docker.io
 sudo docker run -d -p 8080:8080 --name domain_app ilyashev1/monitorsystem:1.0.0
-
+sudo docker cp .env domain_app:monitoring_app/.env
+sudo docker restart domain_app
