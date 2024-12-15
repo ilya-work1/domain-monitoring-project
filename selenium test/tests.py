@@ -11,7 +11,7 @@ import time
 import os
 
 def setup_driver():
-    service = Service('C:/Users/ilya9/OneDrive/Desktop/chromedriver-win64/chromedriver.exe')
+    service = Service('')
     chrome_options = Options()
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     chrome_options.add_experimental_option('detach', True)
