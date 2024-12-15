@@ -50,7 +50,7 @@ def check_url(urls_queue, analyzed_urls_queue):
                     })
 
         except Exception as e:
-            logger.error(f"Error checking {url}: {str(e)}")
+            logger.debug(f"Error checking {url}: {str(e)}")
         finally:
             analyzed_urls_queue.put(result)
             urls_queue.task_done()
@@ -113,6 +113,7 @@ def check_url_mt(domains, username):
         analyzed_urls_queue.task_done()
     
     logger.info(f"Expected {expected_count} results, got {len(results)}")
+    
     
     if len(results) < expected_count:
         logger.warning(f"Lost {expected_count - len(results)} checks")

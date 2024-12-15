@@ -1,6 +1,5 @@
 import os
 import json
-from flask import jsonify
 from config import logger
 
 
@@ -22,10 +21,12 @@ def load_domains(username):
 
         with open(file_path, 'r') as f:
             data = json.load(f)
+        
+        
         return data.get("domains")
     except Exception as e:
-        return jsonify({'message': 'An error occurred while checking domains.', 'error': str(e)}), 500
-    
+        logger.error(f"error while loading user domains: {e}")
+        return []    
 
 def add_domains(domains, username):
     try:
@@ -33,7 +34,7 @@ def add_domains(domains, username):
         current_domains.append(domains)
         return True
     except Exception as e:
-        return jsonify({'message': 'An error occurred while adding domains.', 'error': str(e)})
+        logger.error(f"error while adding user domains: {e}")
     
 def remove_domain(domain_to_remove, username):
     try:
@@ -55,7 +56,7 @@ def remove_domain(domain_to_remove, username):
         else:     
             return False
     except Exception as e:
-        return jsonify({'message': 'An error occurred while removing the domain.', 'error': str(e)})
+        logger.error(f"error while removing user domains: {e}")
 
     
 
@@ -66,6 +67,7 @@ def update_domains(domains, username):
         # Load current domains
         current_domains = load_domains(username)
         
+                
         # Update or add new domains
         for domain in domains:
             # Check if domain already exists
@@ -84,7 +86,7 @@ def update_domains(domains, username):
         
         return True
     except Exception as e:
-        print(f"Error updating domains: {e}")
+        logger.error(f"error while updating user domains: {e}")
         return False
     
 

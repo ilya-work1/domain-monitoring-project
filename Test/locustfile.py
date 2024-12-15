@@ -6,11 +6,11 @@ class MyUser(HttpUser):
     def on_start(self):
         """ login method on start  """
         self.login()
-
+  
     def login(self):
         """ make the login request for creating session """
         response = self.client.post("/login", data={"username": "danbd", "password": "123456"})
-        if response.status_code == 200:
+        if response.status_code == 200:           
             print("Login successful")
         else:
             print("Login failed")
