@@ -355,7 +355,7 @@ def check_domains():
         logger.info(f"Performance Summary for {username}: Checked {len(domains)} domains in {elapsed_time:.2f} seconds.")
 
 
-        logger.info(f"Results: {results}")
+        
 
         return jsonify(results)
     except Exception as e:

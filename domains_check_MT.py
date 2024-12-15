@@ -14,7 +14,7 @@ urls_queue = Queue()
 analyzed_urls_queue = Queue()
 
 # function that recieves JSON of urls and returns JSON of the status of the urls & SSL status and expiration date
-def check_url():
+def check_url(urls_queue, analyzed_urls_queue):
     while not urls_queue.empty():
         url = urls_queue.get()
         result = {
@@ -34,7 +34,7 @@ def check_url():
                 http_future = executor.submit(
                     requests.get, 
                     f'http://{url}', 
-                    timeout=0.5  # Reduced timeout
+                    timeout=1  # Reduced timeout
                 )
 
                 # Get results with timeout
@@ -74,10 +74,8 @@ def check_url_mt(domains, username):
     logger.info(f"Starting optimized check for {len(domains)} domains for user: {username}")
     
     # Clear queues before starting new batch
-    while not urls_queue.empty():
-        urls_queue.get()
-    while not analyzed_urls_queue.empty():
-        analyzed_urls_queue.get()
+    urls_queue = Queue()
+    analyzed_urls_queue = Queue()
     
     # Add domains to queue
     for domain in domains:
@@ -96,7 +94,7 @@ def check_url_mt(domains, username):
         logger.info(f"Starting {max_workers} threads for URL processing")
         futures = []
         for _ in range(max_workers):
-            futures.append(executor.submit(check_url))
+            futures.append(executor.submit(check_url, urls_queue, analyzed_urls_queue))
         
         # Wait with timeout
         done, not_done = concurrent.futures.wait(
