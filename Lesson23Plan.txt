@@ -1,0 +1,82 @@
+Create 5 Instances :
+3 Instances for swarms
+1 for NFS Storage with additional Disk for Jenkins Configurations Files in AWS
+1 for Jenkins Agent
+
+
+Configure the NFS instance:
+1. Rename hostname to Storage
+2. update hostfile with IP hostname
+3. install apt update && apt install nfs-server
+4. find the disk ID with blkid
+5. create partition with : fdisk
+6. Run mkfs.ext4 [diskID] to initialize the file system
+    update etc/fstab: /dev/xvd{letter}1 /mnt/jenkins ext4 defaults 0 0 
+7. mount the new partition with : "mount -a"
+8. edit the /etc/exports with vi && add the swarm cluster members hostnames && according to the example
+9. systemctl stop [nfs-server]
+10. systemctl daemon-reload
+11. systemctl start [nfs-server]
+12. create a directory for jenkins files and change owner with chown -R 1000:1000 /mnt/jenkins
+
+
+
+Configurations of each Swarm :
+1. Rename HostName to the Swarm(Number)
+2. Install apt Updates && apt install Docker.io
+3. Modify the Hosts File with the ips and the hostname for all instances with [IP hostnames]
+4. Create a directory for each swarm for jenkins files
+5. install nfs-common 
+vi etc/fstab
+storage:/mnt/jenkins [localdirectory] nfs defaults 0 0
+daemon reload
+mount -a 
+df -h 
+
+
+Init_Swarm :
+1. Run Docker swarm init on 1 of the swarm Instance
+2. Run Docker swarm Join with a Managers Token from the first instance to all of the other swarm instances
+3. Configure a new overlay Network :
+    "docker network create --driver overlay [jenkins]"
+
+
+
+Creating Docker Service for Jenkins :
+Create Docker Service for the Swarm Cluster :
+"docker service create --name jenkins --publish published=8080,target=8080 --mount type=bind,source=/mnt/jenkins_home,target=/var/jenkins_home jenkins/jenkins"
+
+
+create load balancer :
+1. configure a load balancer from the aws cloud for the swarm
+2. create a target group including all the swarm cluster members
+
+
+configure Jenkins :
+1. connect to one of the swarm node && make a first Configuration for jenkins && connect to the admin user on jenkins website
+2. click on manage jenkins > click on nodes > click on new node > create new node and configure it
+3. copy the command to connect the agent to the swarms
+
+
+configure the agent :
+1. Rename hostname to Agent
+2. update hostfile with [IP hostname]
+3. create a directory for the jenkins agent.service file
+4. install apt update && java
+5. install docker.io
+6. give permmissions to the workingspace path
+7. paste the curl command from Jenkins
+8. run cat<<EOF>> etc/systemd/system/jenkins-agent.service :
+
+[Unit]
+Description=Jenkins Agent for docker related opperations
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=var/jenkins_home
+ExecStart=/bin/bash /var/jenkins_home/service.sh
+#Restart=always
+
+[Install]
+WantedBy=default.target
