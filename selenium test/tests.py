@@ -47,14 +47,16 @@ def register_test():
         logging.info("Confirm password entered")
         
         register_button = wait.until(EC.presence_of_element_located((By.ID, "register")))
-        time.sleep(3)
+        time.sleep(1)
         register_button.click()
         logging.info("Register button clicked")
         
         try:
             positive_message=driver.find_element(By.ID, "positive")
-            positive_message.text == "You have successfully registered. Please sign in."
-            logging.info("User registered successfully")
+            if positive_message.text == "You have successfully registered. Please sign in.":
+                logging.info("User registered successfully")
+            else:
+                logging.error("Registration failed")
         except:
             logging.error('Registration failed')
 
