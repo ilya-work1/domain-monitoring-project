@@ -59,7 +59,6 @@ pipeline {
                         script {
                             sh """
                             sudo docker run --network host --name test ilyashev1/seleniumtest:1.0.0
-                            sudo docker logs test | grep -E 'passed|failed'
                             """
                         }
                     }
