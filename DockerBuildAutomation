@@ -1,15 +1,14 @@
 #!/bin/bash
 DOCKER_USERNAME=$1
 DOCKER_PASSWORD=$2
-apt update
-apt install docker.io -y
-echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
+sudo apt update && sudo apt -y install docker.io
+echo "$DOCKER_PASSWORD" | sudo docker login --username $DOCKER_USERNAME --password-stdin
 if [ $? -ne 0 ]; then
     echo "Docker login failed. Exiting..."
     exit 1
 fi
 echo "Login successful, continuing with script..."
-git clone https://github.com/ilya-work1/domain-monitoring-project.git
+sudo git clone https://github.com/ilya-work1/domain-monitoring-project.git
 cd domain-monitoring-project/
-docker build -t ilyashev1/monitorsystem:1.0.0 .
-docker push ilyashev1/monitorsystem:1.0.0
+sudo docker build -t ilyashev1/monitorsystem:1.0.0 .
+sudo docker push ilyashev1/monitorsystem:1.0.0
