@@ -11,11 +11,14 @@ import time
 import os
 
 def setup_driver():
-    service = Service('')
     chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument('--disable-gpu')
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     chrome_options.add_experimental_option('detach', True)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     driver.set_page_load_timeout(10)
     return driver
 
@@ -57,11 +60,14 @@ def register_test():
                 logging.info("User registered successfully")
             else:
                 logging.error("Registration failed")
+                raise Exception("Registration failed")
         except:
             logging.error('Registration failed')
+            raise Exception("Registration failed")
 
     except WebDriverException as e:
         logging.error(f"Could not reach site {url}: {e}")
+        raise
 
     finally:
         driver.quit()
@@ -93,9 +99,11 @@ def login_test():
                 logging.info('Login successful')
         except:
             logging.error('Login failed')
+            raise Exception('Login failed')
 
     except WebDriverException as e:
         logging.error(f"Could not reach site {url}: {e}")
+        raise
 
     finally:
         driver.quit()
@@ -137,6 +145,7 @@ def dashboard_test():
         except:
             driver.quit()
             logging.error('Dashboard page failed to load')
+            raise Exception('Dashboard page failed to load')
         
         logging.info('**CHECKING** single add domain functionality')
         domain_input=wait.until(EC.presence_of_element_located((By.ID, 'domainInput')))
@@ -155,6 +164,7 @@ def dashboard_test():
         except:
             driver.quit()
             logging.error("Failed to find added domain in dashboard")
+            raise Exception("Failed to find added domain in dashboard")
 
         logging.info('**CHECKING** Refresh All button')
         refresh_button = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "refresh-button")))
@@ -166,6 +176,7 @@ def dashboard_test():
         else:
             driver.quit()
             logging.error("Refresh failed to start")
+            raise Exception("Refresh failed to start")
 
         wait.until(EC.invisibility_of_element_located((By.ID, "spinner")))
         logging.info("Refresh completed")
@@ -176,6 +187,7 @@ def dashboard_test():
         else:
             driver.quit()
             logging.error("Table failed to refresh")
+            raise Exception("Table failed to refresh")
             
         logging.info('**CHECKING** domain deletion from table')
         table_body = wait.until(EC.presence_of_element_located((By.ID, "domainsTableBody")))
@@ -205,6 +217,7 @@ def dashboard_test():
             logging.info(f"Domain {domain_to_delete} was successfully deleted")
         else:
             logging.error("Domain deletion failed")
+            raise Exception("Domain deletion failed")
 
         logging.info('**CHECKING** Logout button')
 
@@ -218,9 +231,11 @@ def dashboard_test():
         else:
             driver.quit()
             logging.error("Failed to log out")
+            raise Exception("Failed to log out")
 
     except WebDriverException as e:
         logging.error(f"An error occurred: {e}")
+        raise
     
     finally:
         driver.quit()
@@ -295,13 +310,14 @@ def DataManagment_test():
             if "example.com" in domain.text:
                 domain_found = True
                 logging.error("Security issue: Shared Dashboard")
-                driver.quit()
+                raise Exception("Security issue: Shared Dashboard")
         
         if not domain_found: 
             logging.info("Dashboard not shared")
     
     except WebDriverException as e:
         logging.error(f"An error occurred: {e}")
+        raise
     
     finally:
         driver.quit()
@@ -368,6 +384,7 @@ def BulkUpload_test():
         except Exception as e:
             driver.quit
             logging.error(f"Failed to verify uploaded domains: {e}")
+            raise
             
         finally:
             # Clean up temp file
@@ -376,7 +393,8 @@ def BulkUpload_test():
     
     except WebDriverException as e:
         logging.error(f"An error occurred: {e}")
-    
+        raise
+
     finally:
         driver.quit() 
         
@@ -465,6 +483,7 @@ def scheduler_test():
             
     except WebDriverException as e:
         logging.error(f"An error occurred: {e}")
+        raise
     
     finally:
         driver.quit() 
@@ -521,9 +540,11 @@ def GoogleLogin_test():
                     
         except WebDriverException as e:
             logging.error(f"Failed during Google authentication: {e}")
+            raise
             
     except WebDriverException as e:
         logging.error(f"Google login test failed: {e}")
+        raise
         
     finally:
         driver.quit()
