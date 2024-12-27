@@ -74,6 +74,7 @@ pipeline {
                         sh """
                         echo ${DOCKER_PASS} | sudo docker login -u ${DOCKER_USER} --password-stdin
                         sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:${fullCommitId}
+                        sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:latest
                         sudo docker push ilyashev1/monitorsystem:${fullCommitId}
                         """
                     }
