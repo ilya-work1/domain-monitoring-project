@@ -30,7 +30,7 @@ pipeline {
             
             stage('clone repo'){
                 steps {
-                    dir('Monitoring app')
+                    dir('Monitoring app'){
                     git branch: 'dev', url: 'https://github.com/ilya-work1/domain-monitoring-project.git'
                     script {
                         fullCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -38,7 +38,7 @@ pipeline {
                     }
                 }
             }
-            
+        }
             stage('docker build & run'){
                 steps {
                     dir('Monitoring app') {
