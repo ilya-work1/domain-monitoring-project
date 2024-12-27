@@ -30,6 +30,7 @@ pipeline {
             
             stage('clone repo'){
                 steps {
+                    dir('Monitoring app')
                     git branch: 'dev', url: 'https://github.com/ilya-work1/domain-monitoring-project.git'
                     script {
                         fullCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
@@ -45,6 +46,7 @@ pipeline {
                             echo "Commit ID is ${commitId}"
                         }
                         sh """
+                        cd domain-monitoring-project
                         sudo docker build -t monitorsystem:${fullCommitId} . 1> /dev/null
                         sudo docker run --network host --name moniappci -p 8080:8080 -d monitorsystem:${fullCommitId}
                         """
