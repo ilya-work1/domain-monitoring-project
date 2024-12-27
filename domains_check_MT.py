@@ -6,13 +6,13 @@ import json
 import concurrent.futures
 from queue import Queue
 import time
-from config import logger
+from config import logger , Config
 from DataManagement import update_domains
 
 def check_certificate(url):
     try:
         context = ssl.create_default_context()
-        with socket.create_connection((url, 443), timeout=2) as sock:
+        with socket.create_connection((url, 443), timeout=Config.SSL_TIMEOUT) as sock:
             with context.wrap_socket(sock, server_hostname=url) as ssock:
                 cert = ssock.getpeercert()
 
@@ -38,7 +38,7 @@ def check_url_mt(domains, username):
     expected_count = request_urls_queue.qsize()
     logger.info(f"Added {expected_count} domains to queue for {username}")
     
-    max_workers = min(500, len(domains) * 2)
+    max_workers = min(Config.MAX_WORKERS, len(domains) * 2)
     
     def check_url():
         while not request_urls_queue.empty():
@@ -59,11 +59,11 @@ def check_url_mt(domains, username):
                     http_future = executor.submit(
                         requests.get, 
                         f'http://{url}', 
-                        timeout=1.5
+                        timeout=Config.HTTP_TIMEOUT
                     )
 
-                    ssl_status, expiry_date, issuer_name = ssl_future.result(timeout=2)
-                    http_response = http_future.result(timeout=2)
+                    ssl_status, expiry_date, issuer_name = ssl_future.result(timeout=Config.SSL_TIMEOUT)
+                    http_response = http_future.result(timeout=Config.HTTP_TIMEOUT)
 
                     if http_response.status_code == 200:
                         result.update({
@@ -88,7 +88,7 @@ def check_url_mt(domains, username):
         
         done, not_done = concurrent.futures.wait(
             futures, 
-            timeout=30,
+            timeout=Config.OVERALL_CHECK_TIMEOUT,
             return_when=concurrent.futures.ALL_COMPLETED
         )
         
