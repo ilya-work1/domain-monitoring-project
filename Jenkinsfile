@@ -76,6 +76,7 @@ pipeline {
                         sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:${fullCommitId}
                         sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:latest
                         sudo docker push ilyashev1/monitorsystem:${fullCommitId}
+                        sudo docker push ilyashev1/monitorsystem:latest
                         """
                     }
                 }
