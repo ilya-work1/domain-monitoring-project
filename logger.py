@@ -17,6 +17,6 @@ logging.basicConfig(
     ]
 )
 
-url='http://127.0.0.1:8080'
+url='http://domain_app:8080'
 test_email=os.getenv('test_email')
 test_password=os.getenv('test_password')
