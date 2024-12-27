@@ -1,12 +1,12 @@
 import os
 import json
 from flask import jsonify
-from config import logger
+from config import logger , Config
 
 
 
 def json_directory():
-    json_dir = 'Jsons'
+    json_dir = Config.JSON_DIRECTORY
     if not os.path.exists(json_dir):
         os.makedirs(json_dir)
     return json_dir

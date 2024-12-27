@@ -16,10 +16,9 @@ import time
 
 # Initialize Flask application
 app = Flask(__name__)
-app.config["SESSION_PERMANENT"] = True  
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10) 
-app.config["SESSION_TYPE"] = "filesystem"
-app.config.from_object(Config)
+app.config["SESSION_PERMANENT"] = Config.SESSION_PERMANENT
+app.config["PERMANENT_SESSION_LIFETIME"] = Config.PERMANENT_SESSION_LIFETIME 
+app.config["SESSION_TYPE"] = Config.SESSION_TYPE
 Session(app)
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT']='1'
@@ -407,4 +406,8 @@ def remove_domain_from_database():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(
+        debug=Config.FLASK_DEBUG,
+        host=Config.FLASK_HOST,
+        port=Config.FLASK_PORT
+    )
