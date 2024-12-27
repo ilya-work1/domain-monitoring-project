@@ -46,7 +46,6 @@ pipeline {
                             echo "Commit ID is ${commitId}"
                         }
                         sh """
-                        cd domain-monitoring-project
                         sudo docker build -t monitorsystem:${fullCommitId} . 1> /dev/null
                         sudo docker run --network host --name moniappci -p 8080:8080 -d monitorsystem:${fullCommitId}
                         """
