@@ -66,27 +66,27 @@ pipeline {
                 }
             }
         }
-    }
-
-    post {
-        success {
-            echo 'Success - Build completed.'
-            script {
-                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]){
-                    sh """
-                    echo ${DOCKER_PASS} | sudo docker login -u ${DOCKER_USER} --password-stdin
-                    sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:${fullCommitId}
-                    sudo docker push ilyashev1/monitorsystem:${fullCommitId}
-                    """
+    
+        post {
+            success {
+                echo 'Success - Build completed.'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]){
+                        sh """
+                        echo ${DOCKER_PASS} | sudo docker login -u ${DOCKER_USER} --password-stdin
+                        sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:${fullCommitId}
+                        sudo docker push ilyashev1/monitorsystem:${fullCommitId}
+                        """
+                    }
                 }
             }
-        }
-
-        failure {
-            echo 'Failure - Build failed.'
-        }
-        always {
-            sh 'sudo docker rm -f $(sudo docker ps -aq)'
-            echo 'deleted all containers'
+    
+            failure {
+                echo 'Failure - Build failed.'
+            }
+            always {
+                sh 'sudo docker rm -f $(sudo docker ps -aq)'
+                echo 'deleted all containers'
+            }
         }
     }
