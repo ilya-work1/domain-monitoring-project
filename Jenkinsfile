@@ -45,7 +45,7 @@ pipeline {
         stage('Start running Selenium tests') {
             steps {
                 sh '''
-                 docker run -d --name selenium-test ilyashev1/seleniumtest
+                 docker run -d --network=host --name selenium-test ilyashev1/seleniumtest
                   sleep 10
                     docker exec selenium-test python3 /app/test.py 
                 '''
