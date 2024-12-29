@@ -31,8 +31,8 @@ pipeline {
             steps {
                 dir('MonitoringApp') {
                     sh '''
-                        docker build -t monitoring-app:${COMMIT_ID} .
-                        docker run --network=host -p 8080:8080 -d monitoring-app:${COMMIT_ID}
+                        docker build -t razielrey/domainmonitoring:${COMMIT_ID} .
+                        docker run --network=host -d --name monitoring-app razielrey/domainmonitoring:${COMMIT_ID}
                     '''
                 }
             }
@@ -40,8 +40,9 @@ pipeline {
 
         stage('Selenium Test') {
             steps {
+                echo "Running Selenium tests..."
                 sh '''
-                    docker run -d --name selenium-test ilyashev1/seleniumtest
+                    docker run --network=host -d --name selenium-test ilyashev1/seleniumtest
                     sleep 10
                     docker exec selenium-test python3 /app/test.py
                 '''
@@ -55,8 +56,9 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-                        docker tag monitoring-app:${COMMIT_ID} ilyashev1/monitoring-app:${COMMIT_ID}
-                        docker push ilyashev1/monitoring-app:${COMMIT_ID}
+                        docker tag razielrey/domainmonitoring:${COMMIT_ID} razielrey/domainmonitoring:latest
+                        docker push razielrey/domainmonitoring:${COMMIT_ID}
+                        docker push razielrey/domainmonitoring:latest
                     '''
                 }
             }
