@@ -3,6 +3,7 @@
 __pycache__/
 flask_session/
 *.pyc
+details.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
