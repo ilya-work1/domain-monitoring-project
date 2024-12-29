@@ -41,6 +41,7 @@ pipeline {
                      }
             }
         }
+    }
 
         stage('Selenium Test') {
             steps {
