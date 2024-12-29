@@ -27,7 +27,8 @@ pipeline {
                     script {
                         sh """
                             docker build -t razielrey/domainmonitoring:${BUILD_TAG} .
-                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} razielrey/domainmonitoring:${BUILD_TAG}
+                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} ilyashev1/monitorsystem:latest
+
                         """
                     }
                 }
