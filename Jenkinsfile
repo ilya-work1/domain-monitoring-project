@@ -45,15 +45,15 @@ pipeline {
 
         stage('Selenium Test') {
             steps {
-                echo "Running Selenium tests..."
-                sh '''
-                    docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0
-                    sleep 10
-                    docker exec selenium-test python3 /app/test.py
-                '''
+             echo "Running Selenium tests..."
+            sh '''
+                 docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0 \
+                 && sleep 10 \
+                    && docker exec selenium-test python3 /test.py
+             '''
             }
-        }
     }
+}
 
     post {
         success {
