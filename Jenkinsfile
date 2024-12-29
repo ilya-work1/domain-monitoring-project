@@ -5,24 +5,17 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = 'docker'
+        // Use BUILD_NUMBER as a unique tag
+        BUILD_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-                echo 'Workspace cleaned successfully'
-            }
-        }
-
         stage('Clone Repository') {
             steps {
                 dir('MonitoringApp') {
                     script {
                         git branch: 'raziel_jenkins', url: 'https://github.com/ilya-work1/domain-monitoring-project.git'
-                        fullCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                        COMMIT_ID = fullCommitId.substring(0, 5)
-
+                        COMMIT_ID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim().take(5)
                     }
                 }
             }
@@ -31,52 +24,46 @@ pipeline {
         stage('Docker Build & Run Monitoring App') {
             steps {
                 dir('MonitoringApp') {
-            script {
-                // Ensure COMMIT_ID is defined and fallback to 'latest' if empty
-                def tag = COMMIT_ID ?: "latest"
-                sh """
-                    docker build -t razielrey/domainmonitoring:${tag} .
-                    docker run --network=host -d --name monitoring-app razielrey/domainmonitoring:${tag}
-                """
-                     }
+                    script {
+                        sh """
+                            docker build -t razielrey/domainmonitoring:${BUILD_TAG} .
+                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} razielrey/domainmonitoring:${BUILD_TAG}
+                        """
+                    }
+                }
             }
         }
-    }
 
         stage('Selenium Test') {
             steps {
-             echo "Running Selenium tests..."
-            sh '''
-                 docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0 \
-                 && sleep 10 \
-                    && docker exec selenium-test python3 /test.py
-             '''
+                sh """
+                    docker run --network=host -d --name selenium-test-${BUILD_TAG} ilyashev1/seleniumtest:1.0.0
+                    sleep 10
+                    docker exec selenium-test-${BUILD_TAG} python3 /test.py
+                """
             }
+        }
     }
-}
 
     post {
         success {
             script {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
+                    sh """
                         echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-                        docker tag razielrey/domainmonitoring:${COMMIT_ID} razielrey/domainmonitoring:latest
-                        docker push razielrey/domainmonitoring:${COMMIT_ID}
+                        docker tag razielrey/domainmonitoring:${BUILD_TAG} razielrey/domainmonitoring:latest
+                        docker push razielrey/domainmonitoring:${BUILD_TAG}
                         docker push razielrey/domainmonitoring:latest
-                    '''
+                    """
                 }
             }
-            echo 'Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'Pipeline failed.'
         }
 
         always {
-            sh 'docker rm -f $(docker ps -aq)'
-            echo 'Cleaned up Docker containers.'
+            sh """
+                docker rm -f \$(docker ps -aq --filter name=monitoring-app-${BUILD_TAG})
+                docker rm -f \$(docker ps -aq --filter name=selenium-test-${BUILD_TAG})
+            """
         }
     }
 }
