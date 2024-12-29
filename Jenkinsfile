@@ -39,7 +39,7 @@ pipeline {
                 sh """
                     docker run --network=host -d --name selenium-test-${BUILD_TAG} ilyashev1/seleniumtest:1.0.0
                     sleep 10
-                    docker exec selenium-test-${BUILD_TAG} python3 /test.py
+                    docker exec selenium-test-${BUILD_TAG} python3 /selenium_test/test_run.py
                 """
             }
         }
