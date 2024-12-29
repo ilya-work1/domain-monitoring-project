@@ -31,14 +31,10 @@ if [[ "$CONFIG_TYPE" == "single" ]]; then
   echo "### Configuring for single instance"
 
   # Prompt for IPs
-  read -p "Enter the IP address of the NFS server: " NFS_IP
   read -p "Enter the IP address of the single node to export to: " NODE_IP
   read -p "Is there an agent configured? (yes/no): " AGENT_CONFIGURED
 
   # Update /etc/hosts with the provided IPs
-  echo "### Adding NFS server IP to /etc/hosts"
-  echo "$NFS_IP storage" >> /etc/hosts
-
   echo "### Adding single node IP to /etc/hosts"
   echo "$NODE_IP single-node" >> /etc/hosts
 
