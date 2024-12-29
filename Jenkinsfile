@@ -22,6 +22,7 @@ pipeline {
                         git branch: 'raziel_jenkins', url: 'https://github.com/ilya-work1/domain-monitoring-project.git'
                         fullCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                         COMMIT_ID = fullCommitId.substring(0, 5)
+
                     }
                 }
             }
@@ -30,11 +31,14 @@ pipeline {
         stage('Docker Build & Run Monitoring App') {
             steps {
                 dir('MonitoringApp') {
-                    sh '''
-                        docker build -t razielrey/domainmonitoring:${COMMIT_ID} .
-                        docker run --network=host -d --name monitoring-app razielrey/domainmonitoring:${COMMIT_ID}
-                    '''
-                }
+            script {
+                // Ensure COMMIT_ID is defined and fallback to 'latest' if empty
+                def tag = COMMIT_ID ?: "latest"
+                sh """
+                    docker build -t razielrey/domainmonitoring:${tag} .
+                    docker run --network=host -d --name monitoring-app razielrey/domainmonitoring:${tag}
+                """
+                     }
             }
         }
 
