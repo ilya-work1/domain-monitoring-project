@@ -10,6 +10,23 @@ pipeline {
     }
 
     stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+                echo 'workspace cleaned'
+                script {
+                    sh"""
+                        if [ \$(sudo docker ps -aq) ]; then
+                            sudo docker rm -f \$(sudo docker ps -aq)
+                        else
+                            echo "No containers to remove"
+                        fi
+                    """
+                }
+                echo 'docker container removed'
+                }
+            }
+
         stage('Clone Repository') {
             steps {
                 dir('MonitoringApp') {
@@ -27,7 +44,7 @@ pipeline {
                     script {
                         sh """
                             docker build -t razielrey/domainmonitoring:${BUILD_TAG} .
-                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} ilyashev1/monitorsystem:latest
+                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} razielrey/domainmonitoring:${BUILD_TAG}
 
                         """
                     }
@@ -38,9 +55,9 @@ pipeline {
         stage('Selenium Test') {
             steps {
                 sh """
-                    docker run --network=host -d --name selenium-test-${BUILD_TAG} ilyashev1/seleniumtest:1.0.0
+                    docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0
                     sleep 10
-                    docker exec selenium-test-${BUILD_TAG} python3 /selenium_test/test_run.py
+                    docker exec selenium-test python3 /selenium_test/test_run.py
                 """
             }
         }
@@ -63,7 +80,7 @@ pipeline {
         always {
             sh """
                 docker rm -f \$(docker ps -aq --filter name=monitoring-app-${BUILD_TAG})
-                docker rm -f \$(docker ps -aq --filter name=selenium-test-${BUILD_TAG})
+                docker rm -f \$(docker ps -aq --filter name=selenium-test)
             """
         }
     }
