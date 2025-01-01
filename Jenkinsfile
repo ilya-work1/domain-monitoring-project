@@ -43,9 +43,8 @@ pipeline {
                 dir('MonitoringApp') {
                     script {
                         sh """
-                            docker build -t razielrey/domainmonitoring:${BUILD_TAG} .
-                            docker run --network=host -d --name monitoring-app-${BUILD_TAG} razielrey/domainmonitoring:${BUILD_TAG}
-
+                            sudo docker build -t razielrey/domainmonitoring:${BUILD_TAG} .
+                            sudo docker run --network=host -d --name monitoring-app-${BUILD_TAG} razielrey/domainmonitoring:${BUILD_TAG}
                         """
                     }
                 }
@@ -55,9 +54,9 @@ pipeline {
         stage('Selenium Test') {
             steps {
                 sh """
-                    docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0
+                    sudo docker run --network=host -d --name selenium-test ilyashev1/seleniumtest:1.0.0
                     sleep 10
-                    docker exec selenium-test python3 /selenium_test/test_run.py
+                    sudo docker exec selenium-test python3 /selenium_test/test_run.py
                 """
             }
         }
@@ -68,10 +67,10 @@ pipeline {
             script {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh """
-                        echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-                        docker tag razielrey/domainmonitoring:${BUILD_TAG} razielrey/domainmonitoring:latest
-                        docker push razielrey/domainmonitoring:${BUILD_TAG}
-                        docker push razielrey/domainmonitoring:latest
+                        echo ${DOCKER_PASS} | sudo docker login -u ${DOCKER_USER} --password-stdin
+                        sudo docker tag razielrey/domainmonitoring:${BUILD_TAG} razielrey/domainmonitoring:latest
+                        sudo docker push razielrey/domainmonitoring:${BUILD_TAG}
+                        sudo docker push razielrey/domainmonitoring:latest
                     """
                 }
             }
@@ -79,8 +78,8 @@ pipeline {
 
         always {
             sh """
-                docker rm -f \$(docker ps -aq --filter name=monitoring-app-${BUILD_TAG})
-                docker rm -f \$(docker ps -aq --filter name=selenium-test)
+                sudo docker rm -f \$(sudo docker ps -aq --filter name=monitoring-app-${BUILD_TAG})
+                sudo docker rm -f \$(sudo docker ps -aq --filter name=selenium-test)
             """
         }
     }
