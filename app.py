@@ -21,11 +21,11 @@ init_sticky_sessions(app)
 app.config["SESSION_PERMANENT"] = Config.SESSION_PERMANENT
 app.config["PERMANENT_SESSION_LIFETIME"] = Config.PERMANENT_SESSION_LIFETIME 
 app.config["SESSION_TYPE"] = Config.SESSION_TYPE
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Prevents CSRF while allowing normal navigation
-app.config["SESSION_COOKIE_SECURE"] = False  # Allow cookies over HTTP 
-app.config["SESSION_COOKIE_HTTPONLY"] = True  # Prevents JavaScript access to session cookie
+app.config["SESSION_COOKIE_SAMESITE"] = Config.SESSION_COOKIE_SAMESITE  # Prevents CSRF while allowing normal navigation
+app.config["SESSION_COOKIE_SECURE"] = Config.SESSION_COOKIE_SECURE  # Allow cookies over HTTP 
+app.config["SESSION_COOKIE_HTTPONLY"] = Config.SESSION_COOKIE_HTTPONLY  # Prevents JavaScript access to session cookie
 app.config["SESSION_COOKIE_NAME"] = "STICKY_SESSION_ID"  # Custom session cookie name
-app.config["SESSION_REFRESH_EACH_REQUEST"] = True  # Update session cookie on each request
+app.config["SESSION_REFRESH_EACH_REQUEST"] = Config.SESSION_REFRESH_EACH_REQUEST  # Update session cookie on each request
 session_interface = Session(app)
 session_interface.permanent = True
 
