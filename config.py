@@ -23,6 +23,18 @@ class Config:
     SESSION_TYPE = os.getenv('SESSION_TYPE')
     SESSION_PERMANENT = os.getenv('SESSION_PERMANENT').lower() == 'true'
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.getenv('SESSION_LIFETIME_MINUTES')))
+    
+    # Redis configuration for session storage
+    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+    REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+    REDIS_DB = int(os.getenv('REDIS_DB', 0))
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+    
+    # Session security settings
+    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'true').lower() == 'true'
+    SESSION_COOKIE_HTTPONLY = os.getenv('SESSION_COOKIE_HTTPONLY', 'true').lower() == 'true'
+    SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
+
 
     # Domain Checking Configuration
     MAX_WORKERS = int(os.getenv('MAX_WORKERS'))

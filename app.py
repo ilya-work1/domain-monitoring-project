@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_session import Session
 from login import check_login, check_username_avaliability, registration
 from domains_check_MT import check_url_mt as check_url
+from session_handler import init_sticky_sessions
 import os
 import json
 from datetime import timedelta
@@ -16,10 +17,17 @@ import time
 
 # Initialize Flask application
 app = Flask(__name__)
+init_sticky_sessions(app)
 app.config["SESSION_PERMANENT"] = Config.SESSION_PERMANENT
 app.config["PERMANENT_SESSION_LIFETIME"] = Config.PERMANENT_SESSION_LIFETIME 
 app.config["SESSION_TYPE"] = Config.SESSION_TYPE
-Session(app)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # Prevents CSRF while allowing normal navigation
+app.config["SESSION_COOKIE_SECURE"] = False  # Allow cookies over HTTP 
+app.config["SESSION_COOKIE_HTTPONLY"] = True  # Prevents JavaScript access to session cookie
+app.config["SESSION_COOKIE_NAME"] = "STICKY_SESSION_ID"  # Custom session cookie name
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True  # Update session cookie on each request
+session_interface = Session(app)
+session_interface.permanent = True
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT']='1'
 
