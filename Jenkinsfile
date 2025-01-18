@@ -53,18 +53,6 @@ pipeline {
                 }
             }
 
-
-            stage('load docker credentials') {
-                steps {
-                    script {
-                        def secrets = readYaml(file: env.DOCKER_CREDENTIALS_FILE)
-                        env.DOCKER_USER = secrets.docker.username
-                        env.DOCKER_PASS = secrets.docker.password
-                    }
-                    echo 'Docker credentials loaded from secrets.yaml'
-                }
-            }
-
             stage('selenium test'){
                 steps{
                     dir('tests') {
