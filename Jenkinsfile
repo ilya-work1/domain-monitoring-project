@@ -80,6 +80,21 @@ pipeline {
                         """
                     }
                 }
+
+                
+                echo 'Running Ansible Playbook deploying to prod'
+                withCredentials([aws(credentialsId: 'aws-credentials')]) {
+                    node('ansible') { 
+                        sh """
+                        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                        export AWS_DEFAULT_REGION=us-west-2
+                        
+                        # Run the Ansible playbook
+                        ansible-playbook -i inventory_aws_ec2.yaml playbook.yaml
+                        """
+                    }
+                }
             }
     
             failure {
