@@ -84,11 +84,14 @@ pipeline {
 
                 
                 echo 'Running Ansible Playbook deploying to prod'
-                withAWS(credentials: AWS_CREDENTIALS_ID) {
-                    node('ansible') { 
+                withCredentials([aws(credentialsId: "${AWS_CREDENTIALS_ID}")]) {
+                    node('ansible') {
                         sh """
-                        export AWS_DEFAULT_REGION=us-west-2
-                        
+                        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                        aws configure set default.region us-west-2
+                        aws configure set output json
+
                         # Run the Ansible playbook
                         ansible-playbook -i inventory_aws_ec2.yaml playbook.yaml
                         """
