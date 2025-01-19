@@ -13,7 +13,7 @@
             <h1 class="dashboard-title">Domain Management Dashboard</h1>
             <div class="user-section">
                 {% if session.username %}
-                <div class="user-profile">
+                <div class="user-profil">
                     {% if session.is_google_user and session.profile_picture %}
                         <img src="{{ session.profile_picture }}" alt="Profile" class="profile-picture">
                     {% else %}
