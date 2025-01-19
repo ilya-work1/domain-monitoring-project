@@ -84,11 +84,9 @@ pipeline {
 
                 
                 echo 'Running Ansible Playbook deploying to prod'
-                withCredentials([usernamePassword(credentialsId: AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                withAWS(credentials: AWS_CREDENTIALS_ID) {
                     node('ansible') { 
                         sh """
-                        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-                        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
                         export AWS_DEFAULT_REGION=us-west-2
                         
                         # Run the Ansible playbook
