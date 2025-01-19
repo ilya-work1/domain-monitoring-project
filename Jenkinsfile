@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = 'docker'
+        AWS_CREDENTIALS_ID = 'aws-credentials'
     }
 
     stages {
@@ -83,7 +84,7 @@ pipeline {
 
                 
                 echo 'Running Ansible Playbook deploying to prod'
-                withCredentials([aws(credentialsId: 'aws-credentials')]) {
+                withCredentials([usernamePassword(credentialsId: AWS_CREDENTIALS_ID, usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     node('ansible') { 
                         sh """
                         export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
