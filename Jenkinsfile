@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = 'docker'
+        AWS_CREDENTIALS_ID = 'aws-credentials'
     }
 
     stages {
@@ -77,6 +78,22 @@ pipeline {
                         sudo docker tag monitorsystem:${fullCommitId} ilyashev1/monitorsystem:latest
                         sudo docker push ilyashev1/monitorsystem:${fullCommitId}
                         sudo docker push ilyashev1/monitorsystem:latest
+                        """
+                    }
+                }
+
+                
+                echo 'Running Ansible Playbook deploying to prod'
+                withCredentials([aws(credentialsId: "${AWS_CREDENTIALS_ID}")]) {
+                    node('ansible') {
+                        sh """
+                        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                        aws configure set default.region us-west-2
+                        aws configure set output json
+
+                        # Run the Ansible playbook
+                        ansible-playbook -i inventory_aws_ec2.yaml playbook.yaml
                         """
                     }
                 }
